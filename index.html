@@ -369,6 +369,12 @@
     // --- Auth Logic ---
     const uiAuthOverlay = document.getElementById('auth-overlay');
     const uiAuthMsg = document.getElementById('auth-message');
+    // --- DEBUG TEST ---
+console.log("Script loaded!");
+document.getElementById('btn-login').addEventListener('click', () => {
+    console.log("Login button clicked!"); 
+});
+// ------------------
 
     async function handleLogin() {
         const email = document.getElementById('email-input').value;

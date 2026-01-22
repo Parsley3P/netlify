@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Duolingo Style Vocab Drill</title>
+    <style>
+        :root {
+            --duo-green: #58cc02;
+            --duo-green-shadow: #46a302;
+            --duo-red: #ff4b4b;
+            --duo-red-shadow: #ea2b2b;
+            --duo-blue: #1cb0f6;
+            --duo-blue-shadow: #1899d6;
+            --duo-gray: #e5e5e5;
+            --text-color: #4b4b4b;
+            --bg-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Fill screen */
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        /* --- Header / Progress --- */
+        header {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .progress-bar-container {
+            flex-grow: 1;
+            height: 16px;
+            background-color: var(--duo-gray);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--duo-green);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            font-weight: bold;
+            color: #afafaf;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        /* --- Main Content --- */
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .word-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 40px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        /* --- Grid for Options --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px;
+            width: 100%;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr; 
+            }
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 2px solid var(--duo-gray);
+            border-bottom-width: 4px;
+            border-radius: 16px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.1s;
+            text-align: left;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
+        .option-btn:hover {
+            background-color: #f7f7f7;
+        }
+
+        .option-btn.selected {
+            border-color: var(--duo-blue);
+            background-color: #ddf4ff;
+            color: var(--duo-blue-shadow);
+        }
+
+        /* Correct/Incorrect States */
+        .option-btn.correct {
+            border-color: var(--duo-green);
+            background-color: #d7ffb8;
+            color: var(--duo-green-shadow);
+        }
+
+        .option-btn.wrong {
+            border-color: var(--duo-red);
+            background-color: #ffdfe0;
+            color: var(--duo-red-shadow);
+        }
+
+        /* --- Footer / Feedback --- */
+        footer {
+            min-height: 140px;
+            border-top: 2px solid var(--duo-gray);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: white;
+        }
+
+        .feedback-content {
+            display: none; /* Hidden by default */
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .feedback-header {
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feedback-text {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+
+        .feedback-correct .feedback-header { color: var(--duo-green); }
+        .feedback-wrong .feedback-header { color: var(--duo-red); }
+
+        .btn-next {
+            background-color: var(--duo-green);
+            color: white;
+            border: none;
+            border-bottom: 4px solid var(--duo-green-shadow);
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            width: 100%;
+            cursor: pointer;
+            letter-spacing: 0.8px;
+        }
+
+        .btn-next:active {
+            transform: translateY(2px);
+            border-bottom-width: 0px;
+            margin-top: 4px; 
+        }
+
+        .btn-next.wrong-state {
+            background-color: var(--duo-red);
+            border-bottom-color: var(--duo-red-shadow);
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            margin-left: 10px;
+            color: white;
+            vertical-align: middle;
+        }
+        .badge-maintained { background-color: var(--duo-blue); }
+        .badge-mastered { background-color: #ffd900; color: #5c4d00; }
+
+        /* Empty state */
+        .finished-screen {
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="stats" id="remaining-count">Words: 30</div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="mastery-bar"></div>
+    </div>
+</header>
+
+<main id="quiz-view">
+    <h1>Select the correct meaning</h1>
+    <div class="word-display" id="question-word">...</div>
+    <div class="options-grid" id="options-container">
+        </div>
+</main>
+
+<main class="finished-screen" id="finished-view">
+    <div class="word-display">🎉 All Words Mastered!</div>
+    <p>You have successfully cleared the list.</p>
+    <button class="btn-next" onclick="location.reload()">Restart</button>
+</main>
+
+<footer id="footer-area">
+    <div class="feedback-content" id="feedback-area">
+        <div class="feedback-header" id="feedback-title"></div>
+        <div class="feedback-text" id="feedback-definition"></div>
+        <button class="btn-next" id="next-btn">Continue</button>
+    </div>
+</footer>
+
+<script>
+    // --- Data Configuration ---
+    // Note: 'crevic' corrected to 'crevice', duplicate 'overhead' removed.
+    // Definitions sourced for accuracy.
+    const rawData = [
+        { w: "poltergeist", d: "A ghost or spirit responsible for physical disturbances like loud noises." },
+        { w: "pompous", d: "Affectedly grand, solemn, or self-important." },
+        { w: "shirk", d: "To avoid or neglect a duty or responsibility." },
+        { w: "laudatory", d: "Expressing praise and commendation." },
+        { w: "dithering", d: "Acting in a nervous or indecisive way." },
+        { w: "eepy", d: "A slang term for feeling sleepy or tired." },
+        { w: "morbidity", d: "The condition of suffering from a disease or medical condition." },
+        { w: "perilous", d: "Full of danger or risk." },
+        { w: "covet", d: "To yearn to possess something belonging to someone else." },
+        { w: "pertinent", d: "Relevant or applicable to a particular matter." },
+        { w: "beef bus", d: "Slang for an ambulance." },
+        { w: "vindicate", d: "To clear someone of blame or suspicion." },
+        { w: "aberration", d: "A departure from what is normal, usual, or expected." },
+        { w: "crevice", d: "A narrow opening or fissure, especially in a rock or wall." },
+        { w: "keepsake", d: "A small item kept in memory of the person who gave it." },
+        { w: "cadence", d: "A modulation or inflection of the voice; rhythmic flow." },
+        { w: "altercation", d: "A noisy argument or disagreement, especially in public." },
+        { w: "lurid", d: "Very vivid in color, typically to create an unpleasantly harsh effect." },
+        { w: "overhead", d: "Business expenses not directly related to creating a product/service." },
+        { w: "epoch", d: "A distinctive period in history or someone's life." },
+        { w: "ambient", d: "Relating to the immediate surroundings of something." },
+        { w: "palpitation", d: "A noticeably rapid, strong, or irregular heartbeat." },
+        { w: "delineate", d: "To describe or portray something precisely." },
+        { w: "decree", d: "An official order issued by a legal authority." },
+        { w: "vernacular", d: "The language or dialect spoken by the ordinary people of a country." },
+        { w: "candid", d: "Truthful and straightforward; frank." },
+        { w: "oft-used", d: "Used frequently." },
+        { w: "triage", d: "The assignment of degrees of urgency to wounds or illnesses." },
+        { w: "humdinger", d: "A remarkable or outstanding person or thing." }
+    ];
+
+    // --- State Management ---
+    let wordList = rawData.map(item => ({
+        word: item.w,
+        def: item.d,
+        correctCount: 0,    // Total times correct
+        consecutive: 0,     // Consecutive times correct
+        status: 'new'       // new, maintained, mastered
+    }));
+
+    let currentQuestion = null;
+    let isWaitingForNext = false;
+    let hasAnswered = false;
+
+    // --- DOM Elements ---
+    const uiWord = document.getElementById('question-word');
+    const uiOptions = document.getElementById('options-container');
+    const uiFeedbackArea = document.getElementById('feedback-area');
+    const uiFeedbackTitle = document.getElementById('feedback-title');
+    const uiFeedbackDef = document.getElementById('feedback-definition');
+    const uiNextBtn = document.getElementById('next-btn');
+    const uiRemaining = document.getElementById('remaining-count');
+    const uiMasteryBar = document.getElementById('mastery-bar');
+    const uiQuizView = document.getElementById('quiz-view');
+    const uiFinishedView = document.getElementById('finished-view');
+
+    // --- Core Logic ---
+
+    function getNextQuestion() {
+        // Filter out words that are "deleted" (Rule 3: Correct 4th time -> deleted)
+        // Actually, we remove them from the active array to keep things clean.
+        
+        if (wordList.length === 0) {
+            showFinished();
+            return;
+        }
+
+        // Weighted random or simple random? Let's use simple random for now,
+        // but prioritize items with lower correct counts slightly if we wanted to be fancy.
+        // For this MVP: Random pick.
+        const index = Math.floor(Math.random() * wordList.length);
+        const target = wordList[index];
+
+        // Generate Distractors
+        const otherWords = rawData.filter(w => w.w !== target.word);
+        // Shuffle other words to pick 3 random distractors
+        const shuffledOthers = otherWords.sort(() => 0.5 - Math.random());
+        const distractors = shuffledOthers.slice(0, 3).map(i => i.d);
+
+        // Combine options
+        let options = [...distractors, target.def];
+        // Shuffle options
+        options = options.sort(() => 0.5 - Math.random());
+
+        return {
+            targetIndex: index, // Index in the active wordList
+            wordData: target,
+            options: options
+        };
+    }
+
+    function renderQuestion() {
+        currentQuestion = getNextQuestion();
+        if(!currentQuestion) return;
+
+        isWaitingForNext = false;
+        hasAnswered = false;
+        
+        // Reset UI
+        uiFeedbackArea.style.display = 'none';
+        uiNextBtn.classList.remove('wrong-state');
+        uiOptions.innerHTML = '';
+        
+        // Show badges logic
+        let badges = '';
+        if(currentQuestion.wordData.consecutive >= 2) {
+            badges += `<span class="badge badge-maintained">Maintained</span>`;
+        }
+        if(currentQuestion.wordData.correctCount >= 3) {
+            badges += `<span class="badge badge-mastered">Mastered</span>`;
+        }
+
+        uiWord.innerHTML = currentQuestion.wordData.word + badges;
+
+        // Create buttons
+        currentQuestion.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => handleAnswer(btn, opt);
+            uiOptions.appendChild(btn);
+        });
+
+        updateStats();
+    }
+
+    function handleAnswer(btn, text) {
+        if (hasAnswered) return; // Prevent multi-clicks
+        hasAnswered = true;
+        isWaitingForNext = true;
+
+        const isCorrect = text === currentQuestion.wordData.def;
+        const targetWordObj = wordList[currentQuestion.targetIndex];
+
+        // Visual Feedback
+        if (isCorrect) {
+            btn.classList.add('correct');
+            uiFeedbackArea.className = 'feedback-content feedback-correct';
+            uiFeedbackTitle.innerText = "Nicely done!";
+            
+            // Rule Logic
+            targetWordObj.consecutive++;
+            targetWordObj.correctCount++; // Increment total correct count
+            
+            // Check for deletion (Rule 3: The 4th time it appears and I get it right -> delete)
+            if(targetWordObj.correctCount >= 4) {
+                 // We will handle removal when clicking "Next" so the user sees the definition first
+                 targetWordObj.shouldDelete = true;
+            }
+
+        } else {
+            btn.classList.add('wrong');
+            // Highlight the correct one
+            const buttons = uiOptions.getElementsByTagName('button');
+            for(let b of buttons) {
+                if(b.innerText === currentQuestion.wordData.def) {
+                    b.classList.add('correct');
+                }
+            }
+
+            uiFeedbackArea.className = 'feedback-content feedback-wrong';
+            uiFeedbackTitle.innerText = "Incorrect";
+            uiNextBtn.classList.add('wrong-state');
+
+            // Rule Logic: Wrong answer
+            // Rule 4: Don't reset progress (Assuming 'progress' means total Mastery count)
+            // But we reset consecutive to restart the "Maintained" tracker
+            targetWordObj.consecutive = 0; 
+        }
+
+        // Show Definition
+        uiFeedbackDef.innerText = `${currentQuestion.wordData.word}: ${currentQuestion.wordData.def}`;
+        uiFeedbackArea.style.display = 'block';
+    }
+
+    function handleNext() {
+        if(!isWaitingForNext) return;
+
+        // Process deletion if marked
+        const targetWordObj = wordList[currentQuestion.targetIndex];
+        if (targetWordObj && targetWordObj.shouldDelete) {
+            wordList.splice(currentQuestion.targetIndex, 1);
+        }
+
+        renderQuestion();
+    }
+
+    function updateStats() {
+        const totalWords = 30; // Original count
+        const currentCount = wordList.length;
+        uiRemaining.innerText = `Remaining: ${currentCount}`;
+        
+        // Calculate mastery (rough percentage of deleted words + mastered words)
+        const deleted = totalWords - currentCount;
+        const masteredActive = wordList.filter(w => w.correctCount >= 3).length;
+        const progressPercent = ((deleted + masteredActive) / totalWords) * 100;
+        
+        uiMasteryBar.style.width = `${progressPercent}%`;
+    }
+
+    function showFinished() {
+        uiQuizView.style.display = 'none';
+        uiFinishedView.style.display = 'block';
+        uiFeedbackArea.style.display = 'none';
+        uiRemaining.innerText = "Remaining: 0";
+        uiMasteryBar.style.width = "100%";
+    }
+
+    // --- Input Handling ---
+
+    // Click on Next Button
+    uiNextBtn.addEventListener('click', handleNext);
+
+    // Keyboard (Enter)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (isWaitingForNext) {
+                handleNext();
+            }
+        }
+    });
+
+    // --- Init ---
+    renderQuestion();
+
+</script>
+</body>
+</html>

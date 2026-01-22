@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vocab Drill with SFX</title>
@@ -228,7 +229,17 @@
     </style>
 </head>
 <body>
-
+<div id="auth-overlay" style="position: fixed; top:0; left:0; right:0; bottom:0; background:white; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+    <h1>Vocab Drill 🔐</h1>
+    <div style="max-width: 300px; width: 100%; display: flex; flex-direction: column; gap: 10px;">
+        <input type="email" id="email-input" placeholder="Email" style="padding: 10px; font-size: 1rem; border: 2px solid #e5e5e5; border-radius: 12px;">
+        <input type="password" id="password-input" placeholder="Password" style="padding: 10px; font-size: 1rem; border: 2px solid #e5e5e5; border-radius: 12px;">
+        
+        <button id="btn-login" class="btn-next" style="margin-top: 10px;">Log In</button>
+        <button id="btn-signup" class="btn-next" style="background-color: white; color: var(--duo-blue); border-color: var(--duo-blue-shadow);">Sign Up</button>
+        <p id="auth-message" style="text-align: center; color: var(--duo-red); font-size: 0.9rem; height: 20px;"></p>
+    </div>
+</div>
 <header>
     <div class="stats" id="remaining-count">Words: 30</div>
     <div class="progress-bar-container">
@@ -333,7 +344,16 @@
         { w: "humdinger", d: "A remarkable or outstanding person or thing." }
     ];
 
+// --- SUPABASE CONFIGURATION ---
+    // ⚠️ REPLACE THESE WITH YOUR ACTUAL KEYS FROM SUPABASE DASHBOARD
+    const SUPABASE_URL = 'https://bqqeejacoblhtkgvikvc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_DDzldQ7KomwJciJrDbRcIA_GGXfXKNi';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let user = null;
+
     // --- State Management ---
+    // We default to rawData, but will overwrite it if we find a save in the cloud
     let wordList = rawData.map(item => ({
         word: item.w,
         def: item.d,
@@ -346,173 +366,96 @@
     let isWaitingForNext = false;
     let hasAnswered = false;
 
-    // --- DOM Elements ---
-    const uiWord = document.getElementById('question-word');
-    const uiOptions = document.getElementById('options-container');
-    const uiFeedbackArea = document.getElementById('feedback-area');
-    const uiFeedbackTitle = document.getElementById('feedback-title');
-    const uiFeedbackDef = document.getElementById('feedback-definition');
-    const uiNextBtn = document.getElementById('next-btn');
-    const uiRemaining = document.getElementById('remaining-count');
-    const uiMasteryBar = document.getElementById('mastery-bar');
-    const uiQuizView = document.getElementById('quiz-view');
-    const uiFinishedView = document.getElementById('finished-view');
+    // --- Auth Logic ---
+    const uiAuthOverlay = document.getElementById('auth-overlay');
+    const uiAuthMsg = document.getElementById('auth-message');
 
-    // --- Core Logic ---
+    async function handleLogin() {
+        const email = document.getElementById('email-input').value;
+        const password = document.getElementById('password-input').value;
+        uiAuthMsg.innerText = "Loading...";
 
-    function getNextQuestion() {
-        if (wordList.length === 0) {
-            showFinished();
-            return;
-        }
-
-        const index = Math.floor(Math.random() * wordList.length);
-        const target = wordList[index];
-
-        const otherWords = rawData.filter(w => w.w !== target.word);
-        const shuffledOthers = otherWords.sort(() => 0.5 - Math.random());
-        const distractors = shuffledOthers.slice(0, 3).map(i => i.d);
-
-        let options = [...distractors, target.def];
-        options = options.sort(() => 0.5 - Math.random());
-
-        return {
-            targetIndex: index,
-            wordData: target,
-            options: options
-        };
-    }
-
-    function renderQuestion() {
-        currentQuestion = getNextQuestion();
-        if(!currentQuestion) return;
-
-        isWaitingForNext = false;
-        hasAnswered = false;
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         
-        // Reset UI
-        uiFeedbackArea.style.display = 'none';
-        uiNextBtn.classList.remove('wrong-state');
-        uiOptions.innerHTML = '';
-        
-        let badges = '';
-        if(currentQuestion.wordData.consecutive >= 2) {
-            badges += `<span class="badge badge-maintained">Maintained</span>`;
-        }
-        if(currentQuestion.wordData.correctCount >= 3) {
-            badges += `<span class="badge badge-mastered">Mastered</span>`;
-        }
-
-        uiWord.innerHTML = currentQuestion.wordData.word + badges;
-
-        currentQuestion.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            // Initialize audio context on first click if needed
-            btn.onclick = () => {
-                AudioEngine.init(); 
-                handleAnswer(btn, opt);
-            };
-            uiOptions.appendChild(btn);
-        });
-
-        updateStats();
-    }
-
-    function handleAnswer(btn, text) {
-        if (hasAnswered) return;
-        hasAnswered = true;
-        isWaitingForNext = true;
-
-        const isCorrect = text === currentQuestion.wordData.def;
-        const targetWordObj = wordList[currentQuestion.targetIndex];
-
-        if (isCorrect) {
-            // PLAY CORRECT SOUND
-            AudioEngine.playCorrect();
-
-            btn.classList.add('correct');
-            uiFeedbackArea.className = 'feedback-content feedback-correct';
-            uiFeedbackTitle.innerText = "Nicely done!";
-            
-            targetWordObj.consecutive++;
-            targetWordObj.correctCount++;
-            
-            if(targetWordObj.correctCount >= 4) {
-                 targetWordObj.shouldDelete = true;
-            }
-
+        if (error) {
+            uiAuthMsg.innerText = error.message;
         } else {
-            // PLAY WRONG SOUND
-            AudioEngine.playWrong();
-
-            btn.classList.add('wrong');
-            const buttons = uiOptions.getElementsByTagName('button');
-            for(let b of buttons) {
-                if(b.innerText === currentQuestion.wordData.def) {
-                    b.classList.add('correct');
-                }
-            }
-
-            uiFeedbackArea.className = 'feedback-content feedback-wrong';
-            uiFeedbackTitle.innerText = "Incorrect";
-            uiNextBtn.classList.add('wrong-state');
-
-            targetWordObj.consecutive = 0; 
+            user = data.user;
+            await loadCloudData();
+            uiAuthOverlay.style.display = 'none';
+            renderQuestion();
         }
-
-        uiFeedbackDef.innerText = `${currentQuestion.wordData.word}: ${currentQuestion.wordData.def}`;
-        uiFeedbackArea.style.display = 'block';
     }
 
-    function handleNext() {
-        if(!isWaitingForNext) return;
+    async function handleSignUp() {
+        const email = document.getElementById('email-input').value;
+        const password = document.getElementById('password-input').value;
+        uiAuthMsg.innerText = "Signing up...";
 
-        const targetWordObj = wordList[currentQuestion.targetIndex];
-        if (targetWordObj && targetWordObj.shouldDelete) {
-            wordList.splice(currentQuestion.targetIndex, 1);
+        const { data, error } = await supabase.auth.signUp({ email, password });
+
+        if (error) {
+            uiAuthMsg.innerText = error.message;
+        } else {
+            uiAuthMsg.innerText = "Check your email to confirm!";
+            // Note: By default Supabase requires email confirmation. 
+            // You can disable this in Supabase Dashboard -> Auth -> Providers -> Email
         }
-
-        renderQuestion();
     }
 
-    function updateStats() {
-        const totalWords = 30; 
-        const currentCount = wordList.length;
-        uiRemaining.innerText = `Remaining: ${currentCount}`;
-        
-        const deleted = totalWords - currentCount;
-        const masteredActive = wordList.filter(w => w.correctCount >= 3).length;
-        const progressPercent = ((deleted + masteredActive) / totalWords) * 100;
-        
-        uiMasteryBar.style.width = `${progressPercent}%`;
-    }
+    // --- Cloud Sync Logic ---
+    async function loadCloudData() {
+        if (!user) return;
 
-    function showFinished() {
-        // Simple success chord
-        AudioEngine.playCorrect();
-        
-        uiQuizView.style.display = 'none';
-        uiFinishedView.style.display = 'block';
-        uiFeedbackArea.style.display = 'none';
-        uiRemaining.innerText = "Remaining: 0";
-        uiMasteryBar.style.width = "100%";
-    }
+        // Try to fetch a row from a table named 'profiles'
+        // (You need to create this table in Supabase Table Editor!)
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('progress_json')
+            .eq('id', user.id)
+            .single();
 
-    // --- Input Handling ---
-    uiNextBtn.addEventListener('click', handleNext);
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            if (isWaitingForNext) {
-                handleNext();
-            }
+        if (data && data.progress_json) {
+            wordList = data.progress_json;
+            console.log("Loaded from cloud!");
+        } else {
+            // First time user? Create the row.
+            saveState(); 
         }
-    });
+    }
 
-    // --- Init ---
-    renderQuestion();
+    async function saveState() {
+        if (!user) return;
+
+        // Upsert (Update if exists, Insert if new)
+        const { error } = await supabase
+            .from('profiles')
+            .upsert({ 
+                id: user.id, 
+                progress_json: wordList,
+                updated_at: new Date()
+            });
+            
+        if (error) console.error("Save failed:", error);
+    }
+
+    // --- Event Listeners for Auth ---
+    document.getElementById('btn-login').addEventListener('click', handleLogin);
+    document.getElementById('btn-signup').addEventListener('click', handleSignUp);
+
+    // Check if user is already logged in (persistence)
+    async function checkSession() {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+            user = data.session.user;
+            await loadCloudData();
+            uiAuthOverlay.style.display = 'none';
+            renderQuestion();
+        }
+    }
+    
+    // Call this at the very end instead of renderQuestion()
+    checkSession();
 
 </script>
 </body>

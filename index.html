@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Duolingo Style Vocab Drill</title>
+    <title>Vocab Drill with SFX</title>
     <style>
         :root {
             --duo-green: #58cc02;
@@ -25,8 +25,9 @@
             color: var(--text-color);
             display: flex;
             flex-direction: column;
-            height: 100vh; /* Fill screen */
-            overflow: hidden; /* Prevent scrolling */
+            height: 100vh;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* Remove mobile tap gray box */
         }
 
         /* --- Header / Progress --- */
@@ -120,6 +121,7 @@
             min-height: 60px;
             display: flex;
             align-items: center;
+            user-select: none;
         }
 
         .option-btn:active {
@@ -129,12 +131,6 @@
 
         .option-btn:hover {
             background-color: #f7f7f7;
-        }
-
-        .option-btn.selected {
-            border-color: var(--duo-blue);
-            background-color: #ddf4ff;
-            color: var(--duo-blue-shadow);
         }
 
         /* Correct/Incorrect States */
@@ -162,7 +158,7 @@
         }
 
         .feedback-content {
-            display: none; /* Hidden by default */
+            display: none;
             max-width: 600px;
             width: 100%;
             margin: 0 auto;
@@ -198,6 +194,7 @@
             width: 100%;
             cursor: pointer;
             letter-spacing: 0.8px;
+            transition: filter 0.2s;
         }
 
         .btn-next:active {
@@ -224,7 +221,6 @@
         .badge-maintained { background-color: var(--duo-blue); }
         .badge-mastered { background-color: #ffd900; color: #5c4d00; }
 
-        /* Empty state */
         .finished-screen {
             display: none;
             text-align: center;
@@ -262,9 +258,49 @@
 </footer>
 
 <script>
+    /* --- AUDIO ENGINE (Web Audio API) ---
+       Generates sounds programmatically to avoid external file dependencies.
+    */
+    const AudioEngine = {
+        ctx: null,
+        init: function() {
+            if (!this.ctx) {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        },
+        playTone: function(freq, type, duration, startTime = 0, vol = 0.1) {
+            if (!this.ctx) this.init();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.type = type;
+            osc.frequency.value = freq;
+            
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            
+            osc.start(this.ctx.currentTime + startTime);
+            
+            // Envelope (Fade out)
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime + startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + startTime + duration);
+            
+            osc.stop(this.ctx.currentTime + startTime + duration);
+        },
+        playCorrect: function() {
+            // "Duolingo" style cheerful rising chime (Major Chord Arpeggio)
+            this.playTone(523.25, 'sine', 0.4, 0.0); // C5
+            this.playTone(659.25, 'sine', 0.4, 0.1); // E5
+            this.playTone(783.99, 'sine', 0.6, 0.2); // G5 (Longer sustain)
+        },
+        playWrong: function() {
+            // "Duolingo" style dull thud/buzz
+            this.playTone(140, 'sawtooth', 0.3, 0.0, 0.08); // Low buzz
+            this.playTone(130, 'triangle', 0.3, 0.05, 0.1); // Lower thud
+        }
+    };
+
     // --- Data Configuration ---
-    // Note: 'crevic' corrected to 'crevice', duplicate 'overhead' removed.
-    // Definitions sourced for accuracy.
     const rawData = [
         { w: "poltergeist", d: "A ghost or spirit responsible for physical disturbances like loud noises." },
         { w: "pompous", d: "Affectedly grand, solemn, or self-important." },
@@ -301,9 +337,9 @@
     let wordList = rawData.map(item => ({
         word: item.w,
         def: item.d,
-        correctCount: 0,    // Total times correct
-        consecutive: 0,     // Consecutive times correct
-        status: 'new'       // new, maintained, mastered
+        correctCount: 0,
+        consecutive: 0,
+        status: 'new' 
     }));
 
     let currentQuestion = null;
@@ -325,33 +361,23 @@
     // --- Core Logic ---
 
     function getNextQuestion() {
-        // Filter out words that are "deleted" (Rule 3: Correct 4th time -> deleted)
-        // Actually, we remove them from the active array to keep things clean.
-        
         if (wordList.length === 0) {
             showFinished();
             return;
         }
 
-        // Weighted random or simple random? Let's use simple random for now,
-        // but prioritize items with lower correct counts slightly if we wanted to be fancy.
-        // For this MVP: Random pick.
         const index = Math.floor(Math.random() * wordList.length);
         const target = wordList[index];
 
-        // Generate Distractors
         const otherWords = rawData.filter(w => w.w !== target.word);
-        // Shuffle other words to pick 3 random distractors
         const shuffledOthers = otherWords.sort(() => 0.5 - Math.random());
         const distractors = shuffledOthers.slice(0, 3).map(i => i.d);
 
-        // Combine options
         let options = [...distractors, target.def];
-        // Shuffle options
         options = options.sort(() => 0.5 - Math.random());
 
         return {
-            targetIndex: index, // Index in the active wordList
+            targetIndex: index,
             wordData: target,
             options: options
         };
@@ -369,7 +395,6 @@
         uiNextBtn.classList.remove('wrong-state');
         uiOptions.innerHTML = '';
         
-        // Show badges logic
         let badges = '';
         if(currentQuestion.wordData.consecutive >= 2) {
             badges += `<span class="badge badge-maintained">Maintained</span>`;
@@ -380,12 +405,15 @@
 
         uiWord.innerHTML = currentQuestion.wordData.word + badges;
 
-        // Create buttons
         currentQuestion.options.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.innerText = opt;
-            btn.onclick = () => handleAnswer(btn, opt);
+            // Initialize audio context on first click if needed
+            btn.onclick = () => {
+                AudioEngine.init(); 
+                handleAnswer(btn, opt);
+            };
             uiOptions.appendChild(btn);
         });
 
@@ -393,32 +421,33 @@
     }
 
     function handleAnswer(btn, text) {
-        if (hasAnswered) return; // Prevent multi-clicks
+        if (hasAnswered) return;
         hasAnswered = true;
         isWaitingForNext = true;
 
         const isCorrect = text === currentQuestion.wordData.def;
         const targetWordObj = wordList[currentQuestion.targetIndex];
 
-        // Visual Feedback
         if (isCorrect) {
+            // PLAY CORRECT SOUND
+            AudioEngine.playCorrect();
+
             btn.classList.add('correct');
             uiFeedbackArea.className = 'feedback-content feedback-correct';
             uiFeedbackTitle.innerText = "Nicely done!";
             
-            // Rule Logic
             targetWordObj.consecutive++;
-            targetWordObj.correctCount++; // Increment total correct count
+            targetWordObj.correctCount++;
             
-            // Check for deletion (Rule 3: The 4th time it appears and I get it right -> delete)
             if(targetWordObj.correctCount >= 4) {
-                 // We will handle removal when clicking "Next" so the user sees the definition first
                  targetWordObj.shouldDelete = true;
             }
 
         } else {
+            // PLAY WRONG SOUND
+            AudioEngine.playWrong();
+
             btn.classList.add('wrong');
-            // Highlight the correct one
             const buttons = uiOptions.getElementsByTagName('button');
             for(let b of buttons) {
                 if(b.innerText === currentQuestion.wordData.def) {
@@ -430,13 +459,9 @@
             uiFeedbackTitle.innerText = "Incorrect";
             uiNextBtn.classList.add('wrong-state');
 
-            // Rule Logic: Wrong answer
-            // Rule 4: Don't reset progress (Assuming 'progress' means total Mastery count)
-            // But we reset consecutive to restart the "Maintained" tracker
             targetWordObj.consecutive = 0; 
         }
 
-        // Show Definition
         uiFeedbackDef.innerText = `${currentQuestion.wordData.word}: ${currentQuestion.wordData.def}`;
         uiFeedbackArea.style.display = 'block';
     }
@@ -444,7 +469,6 @@
     function handleNext() {
         if(!isWaitingForNext) return;
 
-        // Process deletion if marked
         const targetWordObj = wordList[currentQuestion.targetIndex];
         if (targetWordObj && targetWordObj.shouldDelete) {
             wordList.splice(currentQuestion.targetIndex, 1);
@@ -454,11 +478,10 @@
     }
 
     function updateStats() {
-        const totalWords = 30; // Original count
+        const totalWords = 30; 
         const currentCount = wordList.length;
         uiRemaining.innerText = `Remaining: ${currentCount}`;
         
-        // Calculate mastery (rough percentage of deleted words + mastered words)
         const deleted = totalWords - currentCount;
         const masteredActive = wordList.filter(w => w.correctCount >= 3).length;
         const progressPercent = ((deleted + masteredActive) / totalWords) * 100;
@@ -467,6 +490,9 @@
     }
 
     function showFinished() {
+        // Simple success chord
+        AudioEngine.playCorrect();
+        
         uiQuizView.style.display = 'none';
         uiFinishedView.style.display = 'block';
         uiFeedbackArea.style.display = 'none';
@@ -475,11 +501,8 @@
     }
 
     // --- Input Handling ---
-
-    // Click on Next Button
     uiNextBtn.addEventListener('click', handleNext);
 
-    // Keyboard (Enter)
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             if (isWaitingForNext) {

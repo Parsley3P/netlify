@@ -3,515 +3,490 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vocab Drill with SFX</title>
+    <title>Vocab Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --duo-green: #58cc02;
-            --duo-green-shadow: #46a302;
-            --duo-red: #ff4b4b;
-            --duo-red-shadow: #ea2b2b;
-            --duo-blue: #1cb0f6;
-            --duo-blue-shadow: #1899d6;
-            --duo-gray: #e5e5e5;
-            --text-color: #4b4b4b;
-            --bg-color: #ffffff;
-        }
-
         body {
-            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent; /* Remove mobile tap gray box */
+            font-family: 'Nunito', sans-serif;
+            background-color: #111827; /* Dark mode bg */
+            color: #374151;
+            touch-action: manipulation;
         }
 
-        /* --- Header / Progress --- */
-        header {
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .progress-bar-container {
-            flex-grow: 1;
-            height: 16px;
-            background-color: var(--duo-gray);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 0 10px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background-color: var(--duo-green);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .stats {
-            font-weight: bold;
-            color: #afafaf;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
-        /* --- Main Content --- */
-        main {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 0 20px;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            box-sizing: border-box;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 30px;
-            text-align: center;
-            color: var(--text-color);
-        }
-
-        .word-display {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 40px;
-            color: var(--text-color);
-            text-align: center;
-        }
-
-        /* --- Grid for Options --- */
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr; 
-            gap: 15px;
-            width: 100%;
-        }
-
-        @media (min-width: 600px) {
-            .options-grid {
-                grid-template-columns: 1fr 1fr; 
-            }
-        }
-
-        .option-btn {
-            background-color: white;
-            border: 2px solid var(--duo-gray);
-            border-bottom-width: 4px;
-            border-radius: 16px;
-            padding: 15px 20px;
-            font-size: 1rem;
-            color: var(--text-color);
-            cursor: pointer;
+        /* Duolingo-style 3D Buttons */
+        .btn-3d {
             transition: all 0.1s;
-            text-align: left;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            user-select: none;
+            transform: translateY(0);
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            border-bottom-width: 0px;
+            margin-top: 4px;
         }
 
-        .option-btn:active {
-            transform: translateY(2px);
-            border-bottom-width: 2px;
+        /* Custom Colors based on Duolingo */
+        .duo-green { background-color: #58cc02; border-bottom: 4px solid #46a302; color: white; }
+        .duo-green:active { background-color: #58cc02; border-bottom: 0px solid #46a302; }
+        
+        .duo-red { background-color: #ff4b4b; border-bottom: 4px solid #d42c2c; color: white; }
+        
+        .duo-gray { background-color: #e5e7eb; border-bottom: 4px solid #d1d5db; color: #374151; }
+        .duo-gray:active { background-color: #e5e7eb; border-bottom: 0px solid #d1d5db; }
+
+        .duo-outline { 
+            background-color: white; 
+            border: 2px solid #e5e7eb; 
+            border-bottom: 4px solid #e5e7eb;
+            color: #4b5563;
+        }
+        .duo-outline:hover { background-color: #f3f4f6; }
+        .duo-outline:active { border-bottom-width: 0px; transform: translateY(4px); }
+
+        /* Selected State */
+        .selected-answer {
+            background-color: #ddf4ff;
+            border-color: #1cb0f6;
+            border-bottom-color: #1899d6;
+            color: #1899d6;
         }
 
-        .option-btn:hover {
-            background-color: #f7f7f7;
-        }
+        /* Status Pills */
+        .pill { font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase; }
+        .pill-new { background-color: #3b82f6; color: white; }
+        .pill-maintained { background-color: #58cc02; color: white; }
+        .pill-mastered { background-color: #facc15; color: black; }
 
-        /* Correct/Incorrect States */
-        .option-btn.correct {
-            border-color: var(--duo-green);
-            background-color: #d7ffb8;
-            color: var(--duo-green-shadow);
-        }
-
-        .option-btn.wrong {
-            border-color: var(--duo-red);
-            background-color: #ffdfe0;
-            color: var(--duo-red-shadow);
-        }
-
-        /* --- Footer / Feedback --- */
-        footer {
-            min-height: 140px;
-            border-top: 2px solid var(--duo-gray);
-            padding: 20px;
+        #app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            background-color: white;
-        }
-
-        .feedback-content {
-            display: none;
-            max-width: 600px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .feedback-header {
-            font-weight: 800;
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .feedback-text {
-            font-size: 0.95rem;
-            color: var(--text-color);
-            margin-bottom: 15px;
-        }
-
-        .feedback-correct .feedback-header { color: var(--duo-green); }
-        .feedback-wrong .feedback-header { color: var(--duo-red); }
-
-        .btn-next {
-            background-color: var(--duo-green);
-            color: white;
-            border: none;
-            border-bottom: 4px solid var(--duo-green-shadow);
-            border-radius: 12px;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            width: 100%;
-            cursor: pointer;
-            letter-spacing: 0.8px;
-            transition: filter 0.2s;
-        }
-
-        .btn-next:active {
-            transform: translateY(2px);
-            border-bottom-width: 0px;
-            margin-top: 4px; 
-        }
-
-        .btn-next.wrong-state {
-            background-color: var(--duo-red);
-            border-bottom-color: var(--duo-red-shadow);
-        }
-
-        /* Badge Styles */
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            margin-left: 10px;
-            color: white;
-            vertical-align: middle;
-        }
-        .badge-maintained { background-color: var(--duo-blue); }
-        .badge-mastered { background-color: #ffd900; color: #5c4d00; }
-
-        .finished-screen {
-            display: none;
-            text-align: center;
+            position: relative;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="stats" id="remaining-count">Words: 30</div>
-    <div class="progress-bar-container">
-        <div class="progress-bar" id="mastery-bar"></div>
-    </div>
-</header>
-
-<main id="quiz-view">
-    <h1>Select the correct meaning</h1>
-    <div class="word-display" id="question-word">...</div>
-    <div class="options-grid" id="options-container">
+<div id="app-container">
+    <div class="p-4 flex items-center justify-between border-b-2 border-gray-100">
+        <div class="w-full mr-4">
+            <div class="h-4 w-full bg-gray-200 rounded-full relative overflow-hidden">
+                <div id="progress-bar" class="h-full bg-green-500 transition-all duration-500" style="width: 0%"></div>
+            </div>
         </div>
-</main>
-
-<main class="finished-screen" id="finished-view">
-    <div class="word-display">🎉 All Words Mastered!</div>
-    <p>You have successfully cleared the list.</p>
-    <button class="btn-next" onclick="location.reload()">Restart</button>
-</main>
-
-<footer id="footer-area">
-    <div class="feedback-content" id="feedback-area">
-        <div class="feedback-header" id="feedback-title"></div>
-        <div class="feedback-text" id="feedback-definition"></div>
-        <button class="btn-next" id="next-btn">Continue</button>
+        <div class="flex items-center text-red-500 font-bold text-xl">
+            <span>❤️</span>
+        </div>
     </div>
-</footer>
+
+    <div class="px-4 py-2 flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
+        <span id="words-remaining">Loading...</span>
+        <span id="current-status">NEW</span>
+    </div>
+
+    <div class="flex-grow flex flex-col justify-center px-4 pb-24">
+        <h1 class="text-3xl font-extrabold text-gray-700 mb-2 text-center" id="question-word">...</h1>
+        <p class="text-gray-400 text-center mb-8 italic" id="question-pos">(v.)</p>
+
+        <div class="grid grid-cols-1 gap-3" id="options-container">
+            </div>
+    </div>
+
+    <div id="feedback-sheet" class="fixed bottom-0 w-full max-w-[600px] transform translate-y-full transition-transform duration-300 z-50 border-t-2 border-transparent">
+        <div id="feedback-content" class="p-6">
+            <div class="flex items-center mb-2">
+                <div id="feedback-icon" class="bg-white rounded-full p-2 mr-3 text-2xl shadow-sm hidden">
+                    </div>
+                <h2 id="feedback-title" class="text-2xl font-extrabold">Correct!</h2>
+            </div>
+            
+            <div class="mb-6">
+                <p id="feedback-def" class="font-bold text-lg mb-1"></p>
+                <p id="feedback-sentence" class="text-sm opacity-90 italic"></p>
+            </div>
+
+            <button id="next-btn" class="w-full py-4 rounded-2xl font-extrabold text-sm uppercase tracking-widest shadow-lg btn-3d">
+                Continue
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
-    /* --- AUDIO ENGINE (Web Audio API) ---
-       Generates sounds programmatically to avoid external file dependencies.
-    */
-    const AudioEngine = {
-        ctx: null,
-        init: function() {
-            if (!this.ctx) {
-                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        },
-        playTone: function(freq, type, duration, startTime = 0, vol = 0.1) {
-            if (!this.ctx) this.init();
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            
-            osc.type = type;
-            osc.frequency.value = freq;
-            
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            
-            osc.start(this.ctx.currentTime + startTime);
-            
-            // Envelope (Fade out)
-            gain.gain.setValueAtTime(vol, this.ctx.currentTime + startTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + startTime + duration);
-            
-            osc.stop(this.ctx.currentTime + startTime + duration);
-        },
-        playCorrect: function() {
-            // "Duolingo" style cheerful rising chime (Major Chord Arpeggio)
-            this.playTone(523.25, 'sine', 0.4, 0.0); // C5
-            this.playTone(659.25, 'sine', 0.4, 0.1); // E5
-            this.playTone(783.99, 'sine', 0.6, 0.2); // G5 (Longer sustain)
-        },
-        playWrong: function() {
-            // "Duolingo" style dull thud/buzz
-            this.playTone(140, 'sawtooth', 0.3, 0.0, 0.08); // Low buzz
-            this.playTone(130, 'triangle', 0.3, 0.05, 0.1); // Lower thud
-        }
-    };
-
-    // --- Data Configuration ---
+    // --- DATA ---
+    // Cleaned and structured data based on the user prompt
     const rawData = [
-        { w: "poltergeist", d: "A ghost or spirit responsible for physical disturbances like loud noises." },
-        { w: "pompous", d: "Affectedly grand, solemn, or self-important." },
-        { w: "shirk", d: "To avoid or neglect a duty or responsibility." },
-        { w: "laudatory", d: "Expressing praise and commendation." },
-        { w: "dithering", d: "Acting in a nervous or indecisive way." },
-        { w: "eepy", d: "A slang term for feeling sleepy or tired." },
-        { w: "morbidity", d: "The condition of suffering from a disease or medical condition." },
-        { w: "perilous", d: "Full of danger or risk." },
-        { w: "covet", d: "To yearn to possess something belonging to someone else." },
-        { w: "pertinent", d: "Relevant or applicable to a particular matter." },
-        { w: "beef bus", d: "Slang for an ambulance." },
-        { w: "vindicate", d: "To clear someone of blame or suspicion." },
-        { w: "aberration", d: "A departure from what is normal, usual, or expected." },
-        { w: "crevice", d: "A narrow opening or fissure, especially in a rock or wall." },
-        { w: "keepsake", d: "A small item kept in memory of the person who gave it." },
-        { w: "cadence", d: "A modulation or inflection of the voice; rhythmic flow." },
-        { w: "altercation", d: "A noisy argument or disagreement, especially in public." },
-        { w: "lurid", d: "Very vivid in color, typically to create an unpleasantly harsh effect." },
-        { w: "overhead", d: "Business expenses not directly related to creating a product/service." },
-        { w: "epoch", d: "A distinctive period in history or someone's life." },
-        { w: "ambient", d: "Relating to the immediate surroundings of something." },
-        { w: "palpitation", d: "A noticeably rapid, strong, or irregular heartbeat." },
-        { w: "delineate", d: "To describe or portray something precisely." },
-        { w: "decree", d: "An official order issued by a legal authority." },
-        { w: "vernacular", d: "The language or dialect spoken by the ordinary people of a country." },
-        { w: "candid", d: "Truthful and straightforward; frank." },
-        { w: "oft-used", d: "Used frequently." },
-        { w: "triage", d: "The assignment of degrees of urgency to wounds or illnesses." },
-        { w: "humdinger", d: "A remarkable or outstanding person or thing." }
+        {w: "abase", p: "v.", d: "to humiliate, degrade", s: "After being overthrown and abased, the leader bowed."},
+        {w: "abate", p: "v.", d: "to reduce, lessen", s: "The rain poured down for a while, then abated."},
+        {w: "abdicate", p: "v.", d: "to give up a position", s: "Realizing the revolutionaries would win, the king abdicated."},
+        {w: "abduct", p: "v.", d: "to kidnap, take by force", s: "The aliens attempted to abduct the cow."},
+        {w: "aberration", p: "n.", d: "something that differs from the norm", s: "The sudden drop in temperature was an aberration."},
+        {w: "abet", p: "v.", d: "to aid, help, encourage", s: "The spy had a friend on the inside to abet him."},
+        {w: "abhor", p: "v.", d: "to hate, detest", s: "Oswald began to abhor the sport after getting hurt."},
+        {w: "abide", p: "v.", d: "to remain; to accept without objection", s: "Though he disagreed, Chuck decided to abide by the decision."},
+        {w: "abject", p: "adj.", d: "wretched, pitiful", s: "After losing all her money, Eloise was abject."},
+        {w: "abjure", p: "v.", d: "to reject, renounce", s: "The President abjured the evil policies of his predecessor."},
+        {w: "abnegation", p: "n.", d: "denial of comfort to oneself", s: "The monk practiced abnegation by sleeping on the floor."},
+        {w: "abort", p: "v.", d: "to give up on a half-finished project", s: "They had to abort the mission and go home."},
+        {w: "abridge", p: "v.", d: "to cut down, shorten", s: "The publisher abridged the long novel."},
+        {w: "abrogate", p: "v.", d: "to abolish, usually by authority", s: "The government cannot abrogate our right to a free press."},
+        {w: "abscond", p: "v.", d: "to sneak away and hide", s: "The thief absconded with the jewels."},
+        {w: "absolution", p: "n.", d: "freedom from blame, guilt, sin", s: "The jury gave Angela absolution by giving a verdict of not guilty."},
+        {w: "abstain", p: "v.", d: "to freely choose not to do something", s: "He did not want to wear the kilt and abstained."},
+        {w: "abstruse", p: "adj.", d: "hard to comprehend", s: "The philosopher's lecture was too abstruse for the students."},
+        {w: "accede", p: "v.", d: "to agree", s: "The teacher acceded to their request to play baseball."},
+        {w: "accentuate", p: "v.", d: "to stress, highlight", s: "Make sure to accentuate the positive in life."},
+        {w: "accessible", p: "adj.", d: "obtainable, reachable", s: "Getting into college became accessible after she studied."},
+        {w: "acclaim", p: "n.", d: "high praise", s: "Greg’s excellent poem won the acclaim of his friends."},
+        {w: "accolade", p: "n.", d: "high praise, special distinction", s: "Everyone offered accolades to Sam after he won the Prize."},
+        {w: "accommodating", p: "adj.", d: "helpful, obliging, polite", s: "Arnold and Mark were accommodating to each other."},
+        {w: "accord", p: "n.", d: "an agreement", s: "England and Iceland came to a mutually beneficial accord."},
+        {w: "accost", p: "v.", d: "to confront verbally", s: "She stood up and accosted the rude waiter."},
+        {w: "accretion", p: "n.", d: "slow growth in size or amount", s: "Stalactites are formed by the accretion of minerals."},
+        {w: "acerbic", p: "adj.", d: "biting, bitter in tone or taste", s: "Jill became acerbic and made fun of her friends."},
+        {w: "acquiesce", p: "v.", d: "to agree without protesting", s: "He acquiesced to his wife's demand to come inside."},
+        {w: "acrimony", p: "n.", d: "bitterness, discord", s: "They could not keep acrimony from overwhelming their friendship."},
+        {w: "acumen", p: "n.", d: "keen insight", s: "Because of his mathematical acumen, Larry solved it quickly."},
+        {w: "acute", p: "adj.", d: "sharp, severe", s: "The pain in his leg was acute."},
+        {w: "adamant", p: "adj.", d: "impervious, immovable, unyielding", s: "The President remained adamant about his proposal."},
+        {w: "adept", p: "adj.", d: "extremely skilled", s: "Tarzan was adept at jumping from tree to tree."},
+        {w: "adhere", p: "v.", d: "to stick to something", s: "He adhered to the dictates of his religion."},
+        {w: "admonish", p: "v.", d: "to scold gently, warn", s: "The teacher admonished the boy for chewing gum."},
+        {w: "adorn", p: "v.", d: "to decorate", s: "We adorned the tree with ornaments."},
+        {w: "adroit", p: "adj.", d: "skillful, dexterous", s: "The adroit thief picked the pocket unnoticed."},
+        {w: "adulation", p: "n.", d: "extreme praise", s: "Marcy did not believe the book deserved such adulation."},
+        {w: "adumbrate", p: "v.", d: "to sketch out in a vague way", s: "The coach adumbrated a game plan, but didn't give details."},
+        {w: "adverse", p: "adj.", d: "antagonistic, unfavorable", s: "Because of adverse conditions, the hikers turned back."},
+        {w: "advocate", p: "v.", d: "to argue in favor of something", s: "Arnold advocated turning left at the stop sign."},
+        {w: "aerial", p: "adj.", d: "related to the air", s: "We watched the fighter planes conduct aerial maneuvers."},
+        {w: "aesthetic", p: "adj.", d: "artistic, related to beauty", s: "She has such a fine aesthetic sense."},
+        {w: "affable", p: "adj.", d: "friendly, amiable", s: "People like George because he is so affable."},
+        {w: "affluent", p: "adj.", d: "rich, wealthy", s: "Mrs. Grebelski was affluent, owning three cars."},
+        {w: "affront", p: "n.", d: "an insult", s: "Bernardo took the slight as an affront to his honor."},
+        {w: "aggrandize", p: "v.", d: "to increase or make greater", s: "He dropped names to aggrandize his personal stature."},
+        {w: "aggregate", p: "n.", d: "a whole or total", s: "The three branches form a powerful aggregate."},
+        {w: "aggrieved", p: "adj.", d: "distressed, wronged, injured", s: "The foreman overworked his aggrieved employees."},
+        {w: "agile", p: "adj.", d: "quick, nimble", s: "The dogs were too slow to catch the agile rabbit."},
+        {w: "agnostic", p: "adj.", d: "believing God's existence is unprovable", s: "Joey’s parents are religious, but he is agnostic."},
+        {w: "alacrity", p: "n.", d: "eagerness, speed", s: "He set the table with alacrity."},
+        {w: "alias", p: "n.", d: "a false name or identity", s: "He snuck past guards using an alias."},
+        {w: "allay", p: "v.", d: "to soothe, ease", s: "The speech tried to allay investors’ fears."},
+        {w: "allege", p: "v.", d: "to assert, usually without proof", s: "The policeman alleged that Marshall committed the crime."},
+        {w: "alleviate", p: "v.", d: "to relieve, make bearable", s: "This drug will alleviate the symptoms."},
+        {w: "allocate", p: "v.", d: "to distribute, set aside", s: "The Mayor allocated funds for schools."},
+        {w: "aloof", p: "adj.", d: "reserved, distant", s: "The scientist seemed aloof, but was just thinking."},
+        {w: "altercation", p: "n.", d: "a dispute, fight", s: "The car accident led to an altercation."},
+        {w: "amalgamate", p: "v.", d: "to bring together, unite", s: "The candidate amalgamated all parties under his banner."},
+        {w: "ambiguous", p: "adj.", d: "uncertain, variably interpretable", s: "His actual reasons for marriage are ambiguous."},
+        {w: "ambivalent", p: "adj.", d: "having opposing feelings", s: "My feelings about Calvin are ambivalent."},
+        {w: "ameliorate", p: "v.", d: "to improve", s: "The tense situation was ameliorated by Sam's solution."},
+        {w: "amenable", p: "adj.", d: "willing, compliant", s: "Our father was amenable to driving us to the farm."},
+        {w: "amenity", p: "n.", d: "an item that increases comfort", s: "The house is stocked with many amenities."},
+        {w: "amiable", p: "adj.", d: "friendly", s: "An amiable fellow, Harry got along with everyone."},
+        {w: "amicable", p: "adj.", d: "friendly (usually regarding agreement)", s: "They divorced amicably."},
+        {w: "amorous", p: "adj.", d: "showing love, particularly sexual", s: "He felt amorous when he saw her."},
+        {w: "amorphous", p: "adj.", d: "without definite shape", s: "The reasons were amorphous and hard to pin down."},
+        {w: "anachronistic", p: "adj.", d: "out of chronological order", s: "Dinosaurs in the 1900s would be anachronistic."},
+        {w: "analgesic", p: "n.", d: "something that reduces pain", s: "Put this analgesic on the wound."},
+        {w: "analogous", p: "adj.", d: "comparable, similar", s: "The bone structure of whales and fish is analogous."},
+        {w: "anarchist", p: "n.", d: "one who opposes government", s: "Carmine wanted to dissolve every government."},
+        {w: "anathema", p: "n.", d: "a cursed, detested person", s: "That murderer is an anathema to me."},
+        {w: "anecdote", p: "n.", d: "a short, humorous account", s: "Marlon told an anecdote about the toaster."},
+        {w: "anguish", p: "n.", d: "extreme sadness, torment", s: "Angelos suffered terrible anguish."},
+        {w: "animated", p: "adj.", d: "lively", s: "He becomes animated when talking about drama."},
+        {w: "annex", p: "v.", d: "to incorporate territory", s: "The Russians annexed Poland."},
+        {w: "annul", p: "v.", d: "to make void or invalid", s: "Congress sought to annul the law."},
+        {w: "anomaly", p: "n.", d: "something differing from normal order", s: "That rip in space is a spatial anomaly."},
+        {w: "anonymous", p: "adj.", d: "unknown, unrecognized", s: "She received a poem from an anonymous admirer."},
+        {w: "antagonism", p: "n.", d: "hostility", s: "They shared a mutual antagonism."},
+        {w: "antecedent", p: "n.", d: "something that came before", s: "The antecedent to Western culture is Greece."},
+        {w: "antediluvian", p: "adj.", d: "ancient; before the flood", s: "The antediluvian man thought hot dogs cost a nickel."},
+        {w: "anthology", p: "n.", d: "selected collection of writings", s: "The new anthology contains all his hits."},
+        {w: "antipathy", p: "n.", d: "strong dislike", s: "I feel nothing but antipathy for you."},
+        {w: "antiquated", p: "adj.", d: "old, out of date", s: "That antiquated car lacks power steering."},
+        {w: "antiseptic", p: "adj.", d: "clean, sterile", s: "The antiseptic hospital was very bare."},
+        {w: "antithesis", p: "n.", d: "the absolute opposite", s: "Your violence is the antithesis of my beliefs."},
+        {w: "anxiety", p: "n.", d: "intense uneasiness", s: "He felt anxiety about the crash."},
+        {w: "apathetic", p: "adj.", d: "lacking concern, emotion", s: "Bruno was apathetic about politics."},
+        {w: "apocryphal", p: "adj.", d: "fictitious, false", s: "The stories about my demise were apocryphal."},
+        {w: "appalling", p: "adj.", d: "inspiring shock, horror", s: "The judge found the crime appalling."},
+        {w: "appease", p: "v.", d: "to calm, satisfy", s: "She gave him candy to appease him."},
+        {w: "appraise", p: "v.", d: "to assess worth", s: "A realtor will appraise our house."},
+        {w: "apprehend", p: "v.", d: "to seize, arrest", s: "The criminal was apprehended."},
+        {w: "approbation", p: "n.", d: "praise", s: "The crowd welcomed the heroes with approbation."},
+        {w: "appropriate", p: "v.", d: "to take, make use of", s: "The government appropriated the land."},
+        {w: "aquatic", p: "adj.", d: "relating to water", s: "The biologist studies aquatic creatures."},
+        {w: "arable", p: "adj.", d: "suitable for growing crops", s: "The farmer purchased arable land."},
+        {w: "arbiter", p: "n.", d: "one who resolves a dispute", s: "The judge served as arbiter."},
+        {w: "arbitrary", p: "adj.", d: "based on random factors", s: "The choice seemed arbitrary."},
+        {w: "arbitration", p: "n.", d: "process of resolving a dispute", s: "The employee sought official arbitration."},
+        {w: "arboreal", p: "adj.", d: "relating to trees", s: "Leaves and bark are arboreal traits."},
+        {w: "arcane", p: "adj.", d: "obscure, secret", s: "The professor is an expert in arcane literature."},
+        {w: "archaic", p: "adj.", d: "outdated, ancient", s: "An archaic dialect is still spoken there."},
+        {w: "archetypal", p: "adj.", d: "most representative example", s: "He was the archetypal politician."},
+        {w: "ardor", p: "n.", d: "extreme vigor, enthusiasm", s: "The soldiers conveyed their ardor."},
+        {w: "arid", p: "adj.", d: "excessively dry", s: "Cacti grow in arid environments."},
+        {w: "arrogate", p: "v.", d: "to take without justification", s: "The king arrogated the right to execute."},
+        {w: "artifact", p: "n.", d: "remaining piece from old culture", s: "Scientists searched the cave for artifacts."},
+        {w: "artisan", p: "n.", d: "a craftsman", s: "The artisan uses wood to make sticks."},
+        {w: "ascertain", p: "v.", d: "to perceive, learn", s: "The student ascertained the facts."},
+        {w: "ascetic", p: "adj.", d: "practicing self-discipline/restraint", s: "The priest lives an ascetic life."},
+        {w: "ascribe", p: "v.", d: "to assign, credit", s: "Some ascribe fireworks to the Chinese."},
+        {w: "aspersion", p: "n.", d: "a curse, expression of ill-will", s: "Politicians cast aspersions on each other."},
+        {w: "aspire", p: "v.", d: "to long for, aim toward", s: "The poet aspires to publish."},
+        {w: "assail", p: "v.", d: "to attack", s: "War planes assailed the boats."},
+        {w: "assess", p: "v.", d: "to evaluate", s: "A crew arrived to assess damage."},
+        {w: "assiduous", p: "adj.", d: "hard-working, diligent", s: "The skyscraper was built by assiduous labor."},
+        {w: "assuage", p: "v.", d: "to ease, pacify", s: "The mother held the baby to assuage its fears."},
+        {w: "astute", p: "adj.", d: "very clever, crafty", s: "Roger provided astute answers."},
+        {w: "asylum", p: "n.", d: "place of refuge, protection", s: "The forest served as an asylum."},
+        {w: "atone", p: "v.", d: "to repent, make amends", s: "The man atoned for forgetting her birthday."},
+        {w: "atrophy", p: "v.", d: "to wither away, decay", s: "Muscles will atrophy without blood."},
+        {w: "attain", p: "v.", d: "to achieve, arrive at", s: "Athletes strive to attain best times."},
+        {w: "attribute", p: "v.", d: "to credit, assign", s: "He attributes his success to his mother."},
+        {w: "atypical", p: "adj.", d: "not typical, unusual", s: "Screaming is atypical adult behavior."},
+        {w: "audacious", p: "adj.", d: "excessively bold", s: "The fan made an audacious bribe attempt."},
+        {w: "audible", p: "adj.", d: "able to be heard", s: "The shouts were not audible."},
+        {w: "augment", p: "v.", d: "to add to, expand", s: "He seeks to augment his knowledge."},
+        {w: "auspicious", p: "adj.", d: "favorable", s: "The sunny forecast was an auspicious sign."},
+        {w: "austere", p: "adj.", d: "very bare, bleak", s: "The austere furniture made it look haunted."},
+        {w: "avarice", p: "n.", d: "excessive greed", s: "The banker's avarice led to a fortune."},
+        {w: "avenge", p: "v.", d: "to seek revenge", s: "The victims will avenge themselves."},
+        {w: "aversion", p: "n.", d: "strong dislike", s: "Ben has an aversion to cold climates."}
     ];
 
-    // --- State Management ---
-    let wordList = rawData.map(item => ({
-        word: item.w,
-        def: item.d,
-        correctCount: 0,
-        consecutive: 0,
-        status: 'new' 
-    }));
-
+    // --- STATE MANAGEMENT ---
+    let progress = JSON.parse(localStorage.getItem('vocabAppProgress')) || {};
     let currentQuestion = null;
-    let isWaitingForNext = false;
-    let hasAnswered = false;
+    let isFeedbackMode = false;
 
-    // --- DOM Elements ---
-    const uiWord = document.getElementById('question-word');
-    const uiOptions = document.getElementById('options-container');
-    const uiFeedbackArea = document.getElementById('feedback-area');
-    const uiFeedbackTitle = document.getElementById('feedback-title');
-    const uiFeedbackDef = document.getElementById('feedback-definition');
-    const uiNextBtn = document.getElementById('next-btn');
-    const uiRemaining = document.getElementById('remaining-count');
-    const uiMasteryBar = document.getElementById('mastery-bar');
-    const uiQuizView = document.getElementById('quiz-view');
-    const uiFinishedView = document.getElementById('finished-view');
+    // --- SOUND ENGINE (Web Audio API) ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
 
-    // --- Core Logic ---
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
 
-    function getNextQuestion() {
-        if (wordList.length === 0) {
-            showFinished();
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+    }
+
+    // --- LOGIC ---
+    
+    function getWordLevel(word) {
+        return progress[word] || 0;
+    }
+
+    function updateProgress(word, isCorrect) {
+        const currentLevel = getWordLevel(word);
+        if (isCorrect) {
+            progress[word] = currentLevel + 1;
+        } else {
+            // Rule 4: Wrong answer doesn't reset progress
+            // Do nothing
+        }
+        localStorage.setItem('vocabAppProgress', JSON.stringify(progress));
+    }
+
+    function getEligibleWords() {
+        return rawData.filter(item => getWordLevel(item.w) < 4);
+    }
+
+    function generateQuestion() {
+        const eligible = getEligibleWords();
+        
+        if (eligible.length === 0) {
+            alert("Congratulations! You have mastered all words in this list!");
+            localStorage.removeItem('vocabAppProgress');
+            location.reload();
             return;
         }
 
-        const index = Math.floor(Math.random() * wordList.length);
-        const target = wordList[index];
+        // Random selection (weighted slightly towards lower levels could be added, but random is fine)
+        const target = eligible[Math.floor(Math.random() * eligible.length)];
+        
+        // Get 3 distractors
+        let distractors = [];
+        while(distractors.length < 3) {
+            const randomWord = rawData[Math.floor(Math.random() * rawData.length)];
+            if (randomWord.w !== target.w && !distractors.includes(randomWord)) {
+                distractors.push(randomWord);
+            }
+        }
 
-        const otherWords = rawData.filter(w => w.w !== target.word);
-        const shuffledOthers = otherWords.sort(() => 0.5 - Math.random());
-        const distractors = shuffledOthers.slice(0, 3).map(i => i.d);
-
-        let options = [...distractors, target.def];
-        options = options.sort(() => 0.5 - Math.random());
+        const options = [...distractors, target];
+        // Shuffle options
+        options.sort(() => Math.random() - 0.5);
 
         return {
-            targetIndex: index,
-            wordData: target,
+            target: target,
             options: options
         };
     }
 
+    function getLevelLabel(level) {
+        if(level === 0) return {text: "New", class:"pill-new"};
+        if(level === 1) return {text: "Learning", class:"pill-new"};
+        if(level === 2) return {text: "Maintained", class:"pill-maintained"};
+        if(level === 3) return {text: "Mastered", class:"pill-mastered"};
+        return {text: "Done", class:"pill-mastered"};
+    }
+
+    // --- UI RENDER ---
+
     function renderQuestion() {
-        currentQuestion = getNextQuestion();
-        if(!currentQuestion) return;
-
-        isWaitingForNext = false;
-        hasAnswered = false;
+        isFeedbackMode = false;
+        currentQuestion = generateQuestion();
         
-        // Reset UI
-        uiFeedbackArea.style.display = 'none';
-        uiNextBtn.classList.remove('wrong-state');
-        uiOptions.innerHTML = '';
+        const target = currentQuestion.target;
+        const level = getWordLevel(target.w);
+        const levelData = getLevelLabel(level);
+
+        // Header Stats
+        const totalWords = rawData.length;
+        const finishedWords = rawData.filter(w => getWordLevel(w.w) >= 4).length;
+        const percentage = Math.floor((finishedWords / totalWords) * 100);
         
-        let badges = '';
-        if(currentQuestion.wordData.consecutive >= 2) {
-            badges += `<span class="badge badge-maintained">Maintained</span>`;
-        }
-        if(currentQuestion.wordData.correctCount >= 3) {
-            badges += `<span class="badge badge-mastered">Mastered</span>`;
-        }
+        document.getElementById('progress-bar').style.width = `${percentage}%`;
+        document.getElementById('words-remaining').innerText = `${totalWords - finishedWords} words left`;
+        
+        const statusEl = document.getElementById('current-status');
+        statusEl.innerText = levelData.text;
+        statusEl.className = `pill ${levelData.class}`;
 
-        uiWord.innerHTML = currentQuestion.wordData.word + badges;
+        // Question
+        document.getElementById('question-word').innerText = target.w;
+        document.getElementById('question-pos').innerText = `(${target.p})`;
 
-        currentQuestion.options.forEach(opt => {
+        // Options
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        currentQuestion.options.forEach((opt, index) => {
             const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            // Initialize audio context on first click if needed
-            btn.onclick = () => {
-                AudioEngine.init(); 
-                handleAnswer(btn, opt);
-            };
-            uiOptions.appendChild(btn);
+            btn.className = `w-full p-4 rounded-2xl text-left border-2 text-gray-600 font-semibold text-lg btn-3d duo-outline`;
+            btn.innerText = opt.d;
+            btn.onclick = () => handleAnswer(opt, btn);
+            // Add ID for keyboard navigation if needed, or mapping
+            btn.dataset.idx = index;
+            container.appendChild(btn);
         });
 
-        updateStats();
+        // Hide Sheet
+        const sheet = document.getElementById('feedback-sheet');
+        sheet.classList.add('translate-y-full');
     }
 
-    function handleAnswer(btn, text) {
-        if (hasAnswered) return;
-        hasAnswered = true;
-        isWaitingForNext = true;
+    function handleAnswer(selectedOption, btnElement) {
+        if (isFeedbackMode) return;
+        isFeedbackMode = true;
 
-        const isCorrect = text === currentQuestion.wordData.def;
-        const targetWordObj = wordList[currentQuestion.targetIndex];
+        const isCorrect = selectedOption.w === currentQuestion.target.w;
+        
+        // Update Logic
+        updateProgress(currentQuestion.target.w, isCorrect);
 
+        // Visual Feedback on options
+        const allBtns = document.getElementById('options-container').children;
+        
         if (isCorrect) {
-            // PLAY CORRECT SOUND
-            AudioEngine.playCorrect();
-
-            btn.classList.add('correct');
-            uiFeedbackArea.className = 'feedback-content feedback-correct';
-            uiFeedbackTitle.innerText = "Nicely done!";
-            
-            targetWordObj.consecutive++;
-            targetWordObj.correctCount++;
-            
-            if(targetWordObj.correctCount >= 4) {
-                 targetWordObj.shouldDelete = true;
-            }
-
+            playSound('correct');
+            btnElement.classList.remove('duo-outline');
+            btnElement.classList.add('duo-green');
+            btnElement.style.borderColor = '#46a302'; // Dark green border
         } else {
-            // PLAY WRONG SOUND
-            AudioEngine.playWrong();
-
-            btn.classList.add('wrong');
-            const buttons = uiOptions.getElementsByTagName('button');
-            for(let b of buttons) {
-                if(b.innerText === currentQuestion.wordData.def) {
-                    b.classList.add('correct');
+            playSound('wrong');
+            btnElement.classList.remove('duo-outline');
+            btnElement.classList.add('duo-red');
+            btnElement.style.borderColor = '#d42c2c';
+            
+            // Highlight correct one
+            for(let b of allBtns) {
+                if (b.innerText === currentQuestion.target.d) {
+                    b.classList.remove('duo-outline');
+                    // b.classList.add('duo-green');
+                    b.style.color = '#58cc02'; // Just highlight text/border slightly to indicate answer
+                    b.style.border = '2px solid #58cc02';
+                    b.style.borderBottom = '4px solid #58cc02';
                 }
             }
-
-            uiFeedbackArea.className = 'feedback-content feedback-wrong';
-            uiFeedbackTitle.innerText = "Incorrect";
-            uiNextBtn.classList.add('wrong-state');
-
-            targetWordObj.consecutive = 0; 
         }
 
-        uiFeedbackDef.innerText = `${currentQuestion.wordData.word}: ${currentQuestion.wordData.def}`;
-        uiFeedbackArea.style.display = 'block';
+        // Show Bottom Sheet
+        showFeedback(isCorrect);
     }
 
-    function handleNext() {
-        if(!isWaitingForNext) return;
+    function showFeedback(isCorrect) {
+        const sheet = document.getElementById('feedback-sheet');
+        const content = document.getElementById('feedback-content');
+        const title = document.getElementById('feedback-title');
+        const def = document.getElementById('feedback-def');
+        const sentence = document.getElementById('feedback-sentence');
+        const nextBtn = document.getElementById('next-btn');
+        // const icon = document.getElementById('feedback-icon');
 
-        const targetWordObj = wordList[currentQuestion.targetIndex];
-        if (targetWordObj && targetWordObj.shouldDelete) {
-            wordList.splice(currentQuestion.targetIndex, 1);
+        sheet.classList.remove('translate-y-full');
+
+        if(isCorrect) {
+            sheet.className = "fixed bottom-0 w-full max-w-[600px] transform transition-transform duration-300 z-50 border-t-2 bg-[#d7ffb8] border-[#b8f28b] text-[#58cc02]";
+            title.innerText = "Excellent!";
+            nextBtn.className = "w-full py-4 rounded-2xl font-extrabold text-sm uppercase tracking-widest shadow-lg btn-3d duo-green";
+            nextBtn.innerText = "Continue";
+        } else {
+            sheet.className = "fixed bottom-0 w-full max-w-[600px] transform transition-transform duration-300 z-50 border-t-2 bg-[#ffdfe0] border-[#ffc1c1] text-[#ea2b2b]";
+            title.innerText = "Correct Answer:";
+            nextBtn.className = "w-full py-4 rounded-2xl font-extrabold text-sm uppercase tracking-widest shadow-lg btn-3d duo-red";
+            nextBtn.innerText = "Got it";
         }
 
+        def.innerHTML = `<span class="text-gray-800">${currentQuestion.target.d}</span>`;
+        sentence.innerText = `"${currentQuestion.target.s}"`;
+    }
+
+    // --- EVENT LISTENERS ---
+
+    document.getElementById('next-btn').addEventListener('click', () => {
         renderQuestion();
-    }
+    });
 
-    function updateStats() {
-        const totalWords = 30; 
-        const currentCount = wordList.length;
-        uiRemaining.innerText = `Remaining: ${currentCount}`;
-        
-        const deleted = totalWords - currentCount;
-        const masteredActive = wordList.filter(w => w.correctCount >= 3).length;
-        const progressPercent = ((deleted + masteredActive) / totalWords) * 100;
-        
-        uiMasteryBar.style.width = `${progressPercent}%`;
-    }
-
-    function showFinished() {
-        // Simple success chord
-        AudioEngine.playCorrect();
-        
-        uiQuizView.style.display = 'none';
-        uiFinishedView.style.display = 'block';
-        uiFeedbackArea.style.display = 'none';
-        uiRemaining.innerText = "Remaining: 0";
-        uiMasteryBar.style.width = "100%";
-    }
-
-    // --- Input Handling ---
-    uiNextBtn.addEventListener('click', handleNext);
-
+    // Keyboard support
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-            if (isWaitingForNext) {
-                handleNext();
+            if (isFeedbackMode) {
+                renderQuestion();
             }
+        }
+        // Optional: Number keys to select answers?
+        if (!isFeedbackMode && ['1','2','3','4'].includes(e.key)) {
+            const idx = parseInt(e.key) - 1;
+            const btns = document.getElementById('options-container').children;
+            if (btns[idx]) btns[idx].click();
         }
     });
 
-    // --- Init ---
+    // --- INIT ---
     renderQuestion();
 
 </script>

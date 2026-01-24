@@ -27,14 +27,14 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #f7f7f7; /* Light grey bg for desktop */
+            background-color: #f7f7f7;
             display: flex;
             justify-content: center;
             min-height: 100vh;
         }
 
-        /* Mobile First Container */
-        #app {
+        /* Container for all screens */
+        .screen-container {
             background-color: var(--bg-color);
             width: 100%;
             max-width: 600px;
@@ -42,10 +42,68 @@
             flex-direction: column;
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            height: 100vh; /* Full viewport height on mobile */
+            height: 100vh;
+            overflow: hidden;
         }
 
-        /* Header */
+        /* --- SCREEN 1: WELCOME --- */
+        #welcome-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .mascot {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        .welcome-title {
+            color: var(--duo-green);
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            color: var(--duo-text-light);
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid var(--duo-gray);
+            border-radius: 12px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+            color: var(--duo-text);
+        }
+
+        .name-input:focus {
+            border-color: var(--duo-blue);
+        }
+
+        /* --- SCREEN 2: QUIZ (Existing Styles) --- */
+        #quiz-screen {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            height: 100%;
+        }
+
         header {
             padding: 16px 20px;
             display: flex;
@@ -76,7 +134,6 @@
             font-size: 1.2rem;
         }
 
-        /* Main Content */
         main {
             flex: 1;
             padding: 20px;
@@ -96,9 +153,9 @@
             font-weight: 600;
             color: var(--duo-text);
             line-height: 1.5;
+            font-size: 1.1rem;
         }
 
-        /* Options Grid */
         .options-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -106,9 +163,7 @@
         }
 
         @media (min-width: 480px) {
-            .options-grid {
-                grid-template-columns: 1fr 1fr; /* 2 cols on larger screens */
-            }
+            .options-grid { grid-template-columns: 1fr 1fr; }
         }
 
         .option-btn {
@@ -124,37 +179,49 @@
             text-align: center;
         }
 
-        .option-btn:active {
-            transform: translateY(2px);
-            border-bottom-width: 2px;
+        .option-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .option-btn.selected { background-color: #ddf4ff; border-color: var(--duo-blue); color: var(--duo-blue-dark); }
+        .option-btn.correct { background-color: #d7ffb8; border-color: var(--duo-green); color: var(--duo-green-dark); }
+        .option-btn.wrong { background-color: #ffdfe0; border-color: var(--duo-red); color: var(--duo-red-dark); }
+
+        /* --- SCREEN 3: CONGRATULATIONS --- */
+        #completion-screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            background-color: #d7ffb8; /* Light green bg */
+        }
+        
+        .completion-icon {
+            font-size: 6rem;
+            margin-bottom: 20px;
         }
 
-        .option-btn.selected {
-            background-color: #ddf4ff;
-            border-color: var(--duo-blue);
-            color: var(--duo-blue-dark);
-        }
-
-        .option-btn.correct {
-            background-color: #d7ffb8;
-            border-color: var(--duo-green);
+        .completion-title {
             color: var(--duo-green-dark);
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
         }
 
-        .option-btn.wrong {
-            background-color: #ffdfe0;
-            border-color: var(--duo-red);
-            color: var(--duo-red-dark);
+        .completion-msg {
+            color: var(--duo-text);
+            font-size: 1.2rem;
+            margin-bottom: 30px;
         }
 
-        /* Bottom Action Sheet (Feedback) */
+        /* --- SHARED COMPONENTS --- */
         .bottom-sheet {
-            position: fixed; /* Fixed to stick to bottom */
+            position: fixed;
             bottom: 0;
-            left: 50%; /* Center horizontally */
-            transform: translateX(-50%); /* Center adjustment */
+            left: 50%;
+            transform: translateX(-50%);
             width: 100%;
-            max-width: 600px; /* Match app width */
+            max-width: 600px;
             padding: 20px;
             border-top: 2px solid transparent;
             display: none;
@@ -162,42 +229,13 @@
             z-index: 100;
         }
 
-        .bottom-sheet.correct {
-            background-color: #d7ffb8;
-            color: var(--duo-green-dark);
-            display: flex;
-        }
+        .bottom-sheet.correct { background-color: #d7ffb8; color: var(--duo-green-dark); display: flex; }
+        .bottom-sheet.wrong { background-color: #ffdfe0; color: var(--duo-red-dark); display: flex; }
 
-        .bottom-sheet.wrong {
-            background-color: #ffdfe0;
-            color: var(--duo-red-dark);
-            display: flex;
-        }
+        .feedback-header { font-weight: 800; font-size: 1.5rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .feedback-text { font-size: 1rem; margin-bottom: 20px; color: var(--duo-text); }
+        .example-sentence { font-style: italic; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 15px; }
 
-        .feedback-header {
-            font-weight: 800;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .feedback-text {
-            font-size: 1rem;
-            margin-bottom: 20px;
-            color: var(--duo-text);
-        }
-
-        .example-sentence {
-            font-style: italic;
-            background: rgba(255,255,255,0.5);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        /* Buttons */
         .action-btn {
             width: 100%;
             padding: 14px;
@@ -209,78 +247,81 @@
             border-bottom: 4px solid;
             cursor: pointer;
             font-size: 1rem;
+            transition: filter 0.2s;
         }
 
-        .check-btn {
-            background-color: var(--duo-green);
-            color: white;
-            border-color: var(--duo-green-dark);
-            margin-top: auto; /* Push to bottom if in main flow */
-        }
-        
-        .check-btn:disabled {
-            background-color: var(--duo-gray);
-            border-color: #bfbfbf;
-            color: #afafaf;
-            cursor: not-allowed;
-        }
+        .start-btn { background-color: var(--duo-blue); color: white; border-color: var(--duo-blue-dark); }
+        .check-btn { background-color: var(--duo-green); color: white; border-color: var(--duo-green-dark); margin-top: auto; }
+        .check-btn:disabled { background-color: var(--duo-gray); border-color: #bfbfbf; color: #afafaf; cursor: not-allowed; }
+        .continue-btn { background-color: var(--duo-green); color: white; border-color: var(--duo-green-dark); }
+        .bottom-sheet.wrong .continue-btn { background-color: var(--duo-red); border-color: var(--duo-red-dark); }
 
-        .continue-btn {
-            background-color: var(--duo-green); /* Default for correct */
-            color: white;
-            border-color: var(--duo-green-dark);
-        }
-
-        .bottom-sheet.wrong .continue-btn {
-            background-color: var(--duo-red);
-            border-color: var(--duo-red-dark);
-        }
-
-        /* Mastery Badge */
-        .badge {
-            font-size: 0.8rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-left: 5px;
-            text-transform: uppercase;
-        }
+        .badge { font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; margin-left: 5px; text-transform: uppercase; display: inline-block;}
         .badge-new { background: #eee; color: #777; }
         .badge-maintained { background: #ffbd00; color: #fff; }
         .badge-mastered { background: var(--duo-blue); color: #fff; }
 
-        /* Mobile specific adjustments */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
         @media (max-height: 600px) {
             h2 { font-size: 1.2rem; margin-bottom: 15px; }
             .option-btn { padding: 10px; }
+            .mascot { font-size: 3rem; }
         }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <header>
-        <div class="progress-container">
-            <div class="progress-bar" id="mastery-bar"></div>
-        </div>
-        <div class="stats">
-            <span id="remaining-count">0</span> Left
-        </div>
-    </header>
-
-    <main id="quiz-area">
-        <h2>Select the correct word</h2>
+<div class="screen-container">
+    
+    <div id="welcome-screen">
+        <div class="mascot">🦉</div>
+        <h1 class="welcome-title">Vocab Master</h1>
+        <p class="welcome-subtitle">Memorize 50+ difficult words with spaced repetition.</p>
         
-        <div style="margin-bottom: 20px;">
-            <p class="definition-text" id="question-text">...</p>
+        <div class="input-group">
+            <input type="text" id="username-input" class="name-input" placeholder="What is your name?" autocomplete="off">
         </div>
+        
+        <button id="start-btn" class="action-btn start-btn">Get Started</button>
+    </div>
 
-        <div class="options-grid" id="options-container">
+    <div id="quiz-screen">
+        <header>
+            <div class="progress-container">
+                <div class="progress-bar" id="mastery-bar"></div>
+            </div>
+            <div class="stats">
+                <span id="remaining-count">0</span> Left
+            </div>
+        </header>
+
+        <main id="quiz-area">
+            <h2>Select the correct word</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <p class="definition-text" id="question-text">...</p>
             </div>
 
-        <div style="flex: 1"></div> <div style="padding: 20px; width: 100%;">
-            <button id="check-btn" class="action-btn check-btn" disabled>Check</button>
-        </div>
-    </main>
+            <div class="options-grid" id="options-container">
+                </div>
+
+            <div style="flex: 1"></div>
+            <div style="padding: 20px; width: 100%;">
+                <button id="check-btn" class="action-btn check-btn" disabled>Check</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="completion-screen">
+        <div class="completion-icon">🏆</div>
+        <div class="completion-title">Congratulations <span id="final-user-name"></span>!</div>
+        <p class="completion-msg">You have successfully mastered the entire vocabulary list.</p>
+        <button onclick="location.reload()" class="action-btn continue-btn">Practice Again</button>
+    </div>
 
     <div id="feedback-sheet" class="bottom-sheet">
         <div class="feedback-header" id="feedback-title"></div>
@@ -288,6 +329,7 @@
         <div class="example-sentence" id="feedback-example"></div>
         <button id="continue-btn" class="action-btn continue-btn">Continue</button>
     </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -350,14 +392,13 @@
         {w:"canvas", p:"n.", d:"a piece of cloth on which an artist paints", s:"Picasso liked to work on canvas rather than on bare cement."}
     ];
 
-    // Initialize State
-    // Progress Levels: 0 = New, 1 = Learned, 2 = Maintained, 3 = Mastered, 4 = Deleted
+    // --- 2. State & Audio ---
     let vocabList = rawData.map(item => ({...item, progress: 0}));
     let currentItem = null;
     let selectedOption = null;
     let isAnswered = false;
+    let userName = "";
 
-    // --- 2. Audio Engine (Web Audio API) ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playSound(type) {
@@ -367,57 +408,95 @@
         oscillator.connect(gainNode);
         gainNode.connect(audioCtx.destination);
 
+        const now = audioCtx.currentTime;
+
         if (type === 'correct') {
-            // High pitch ding
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            oscillator.frequency.setValueAtTime(600, now);
+            oscillator.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
             oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.4);
+            oscillator.stop(now + 0.4);
         } else if (type === 'wrong') {
-            // Low thud
             oscillator.type = 'sawtooth';
-            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            oscillator.frequency.setValueAtTime(150, now);
+            oscillator.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
             oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.3);
+            oscillator.stop(now + 0.3);
         } else if (type === 'click') {
-            // Soft click
             oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            oscillator.frequency.setValueAtTime(300, now);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
             oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.05);
+            oscillator.stop(now + 0.05);
         }
     }
 
-    // --- 3. Game Logic ---
-
-    function getProgressColor(level) {
-        if(level === 0) return "#eee";
-        if(level === 1) return "#b8e2f2"; // Light blue
-        if(level === 2) return "#ffd900"; // Gold
-        return "#58cc02"; // Green
+    // --- 3. Screen Management ---
+    
+    function startApp() {
+        const input = document.getElementById('username-input');
+        userName = input.value.trim() || "Friend"; // Default if empty
+        
+        // Initialize Audio context on first user interaction
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'flex';
+        
+        generateQuestion();
     }
+
+    function showCompletion() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('completion-screen').style.display = 'flex';
+        document.getElementById('final-user-name').innerText = userName;
+        
+        // Heavy celebration confetti
+        const duration = 3000;
+        const end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 }
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 }
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+        
+        playSound('correct');
+    }
+
+    // --- 4. Game Logic ---
 
     function generateQuestion() {
         // Filter out completed words (Level 4)
         const activeWords = vocabList.filter(i => i.progress < 4);
 
         if (activeWords.length === 0) {
-            alert("Congratulations! You have mastered all words!");
+            showCompletion();
             return;
         }
 
-        // Pick random word from active list
+        // Pick random word
         currentItem = activeWords[Math.floor(Math.random() * activeWords.length)];
 
-        // Pick 3 distractors
+        // Pick distractors
         const otherWords = rawData.filter(w => w.w !== currentItem.w);
         const distractors = [];
         while(distractors.length < 3) {
@@ -425,7 +504,7 @@
             if (!distractors.includes(r)) distractors.push(r);
         }
 
-        // Combine and Shuffle
+        // Shuffle options
         const options = [currentItem, ...distractors];
         for (let i = options.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -436,23 +515,22 @@
     }
 
     function renderUI(target, options) {
-        // Update Stats
+        // Stats
         const activeCount = vocabList.filter(i => i.progress < 4).length;
         document.getElementById('remaining-count').innerText = activeCount;
         
-        // Calculate overall mastery percentage
         const totalLevels = rawData.length * 4;
         const currentLevels = vocabList.reduce((acc, curr) => acc + curr.progress, 0);
         document.getElementById('mastery-bar').style.width = `${(currentLevels/totalLevels)*100}%`;
 
-        // Render Question
+        // Question
         const badgeLabel = ["New", "Learning", "Maintained", "Mastered"][target.progress];
         const badgeClass = ["badge-new", "badge-new", "badge-maintained", "badge-mastered"][target.progress];
         
         document.getElementById('question-text').innerHTML = 
-            ` <br/> <span style="font-size:0.9em; color:#999;">(${target.p})</span> ${target.d} <span class="badge ${badgeClass}">${badgeLabel}</span>`;
+            `(${target.p}) ${target.d} <span class="badge ${badgeClass}">${badgeLabel}</span>`;
 
-        // Render Options
+        // Options
         const container = document.getElementById('options-container');
         container.innerHTML = '';
         
@@ -464,12 +542,12 @@
             container.appendChild(btn);
         });
 
-        // Reset State
+        // Reset UI
         selectedOption = null;
         isAnswered = false;
         document.getElementById('check-btn').innerText = "CHECK";
         document.getElementById('check-btn').disabled = true;
-        document.getElementById('check-btn').style.display = 'block'; // Ensure visible
+        document.getElementById('check-btn').style.display = 'block';
         document.getElementById('feedback-sheet').style.display = 'none';
         document.getElementById('feedback-sheet').className = 'bottom-sheet';
     }
@@ -478,9 +556,7 @@
         if (isAnswered) return;
         playSound('click');
         
-        // Remove selected class from others
         document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-        
         btnElement.classList.add('selected');
         selectedOption = word;
         document.getElementById('check-btn').disabled = false;
@@ -495,7 +571,6 @@
         const checkBtn = document.getElementById('check-btn');
         const feedbackSheet = document.getElementById('feedback-sheet');
 
-        // Visual Feedback on Buttons
         buttons.forEach(btn => {
             if (btn.innerText === currentItem.w) {
                 btn.classList.add('correct');
@@ -504,64 +579,53 @@
             }
         });
 
-        // Update Data Logic
         if (isCorrect) {
             currentItem.progress++;
             playSound('correct');
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.8 },
-                colors: ['#58cc02', '#ffffff']
-            });
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#58cc02', '#ffffff'] });
             feedbackSheet.classList.add('correct');
             document.getElementById('feedback-title').innerHTML = '<span style="font-size:1.5em">✓</span> Excellent!';
         } else {
-            // Logic: Don't reset progress if wrong (Rule 4)
             playSound('wrong');
             feedbackSheet.classList.add('wrong');
-            document.getElementById('feedback-title').innerHTML = '<span style="font-size:1.5em">✖</span> Correct answer: ' + currentItem.w;
+            document.getElementById('feedback-title').innerHTML = '<span style="font-size:1.5em">✖</span> Correct: ' + currentItem.w;
         }
 
-        // Show Definition/Sentence
         document.getElementById('feedback-detail').innerText = currentItem.d;
         document.getElementById('feedback-example').innerHTML = `"${currentItem.s}"`;
 
-        // Switch UI to Feedback mode
         checkBtn.style.display = 'none';
         feedbackSheet.style.display = 'flex';
-        
-        // Focus continue button for keyboard accessibility
         document.getElementById('continue-btn').focus();
     }
 
-    function nextQuestion() {
-        generateQuestion();
-    }
+    // --- 5. Event Listeners ---
 
-    // --- 4. Event Listeners ---
-
+    document.getElementById('start-btn').addEventListener('click', startApp);
     document.getElementById('check-btn').addEventListener('click', checkAnswer);
-    
     document.getElementById('continue-btn').addEventListener('click', () => {
         playSound('click');
-        nextQuestion();
+        generateQuestion();
     });
 
-    // Keyboard support
+    // Enter Key Logic
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-            if (!isAnswered && selectedOption) {
-                checkAnswer();
-            } else if (isAnswered) {
-                playSound('click');
-                nextQuestion();
+            const welcomeVisible = document.getElementById('welcome-screen').style.display !== 'none';
+            const quizVisible = document.getElementById('quiz-screen').style.display === 'flex';
+            
+            if (welcomeVisible) {
+                startApp();
+            } else if (quizVisible) {
+                if (!isAnswered && selectedOption) {
+                    checkAnswer();
+                } else if (isAnswered) {
+                    playSound('click');
+                    generateQuestion();
+                }
             }
         }
     });
-
-    // Start App
-    generateQuestion();
 
 </script>
 </body>

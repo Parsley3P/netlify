@@ -3,630 +3,632 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocab Master - Duolingo Style</title>
+    <title>Vocab Master</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --duo-green: #58cc02;
-            --duo-green-dark: #46a302;
+            --duo-green-shadow: #46a302;
             --duo-red: #ff4b4b;
-            --duo-red-dark: #ea2b2b;
+            --duo-red-shadow: #d42c2c;
             --duo-blue: #1cb0f6;
-            --duo-blue-dark: #1899d6;
+            --duo-blue-shadow: #1899d6;
             --duo-gray: #e5e5e5;
-            --duo-text: #4b4b4b;
-            --duo-text-light: #777;
-            --bg-color: #ffffff;
+            --duo-gray-text: #afafaf;
+            --duo-dark: #3c3c3c;
+            --bg-color: #fff;
+            --font-main: 'Martian Mono', monospace;
         }
 
         * {
             box-sizing: border-box;
-            font-family: 'Nunito', 'Segoe UI', sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation; /* Improves touch response on mobile */
         }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: #f7f7f7;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        /* Container for all screens */
-        .screen-container {
+            font-family: var(--font-main);
             background-color: var(--bg-color);
-            width: 100%;
-            max-width: 600px;
+            color: var(--duo-dark);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            height: 100vh;
             overflow: hidden;
         }
 
-        /* --- SCREEN 1: WELCOME --- */
-        #welcome-screen {
+        /* --- Layout --- */
+        .container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            max-width: 600px; /* Mobile first logic, constrained width for desktop */
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* --- Welcome Screen --- */
+        #welcome-screen, #end-screen {
+            display: flex;
+            flex-direction: column;
             justify-content: center;
-            padding: 40px;
+            align-items: center;
+            height: 100%;
             text-align: center;
         }
 
-        .mascot {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
-        }
-
-        .welcome-title {
-            color: var(--duo-green);
-            font-size: 2rem;
+        h1 {
             font-weight: 800;
-            margin-bottom: 10px;
+            color: var(--duo-green);
+            margin-bottom: 2rem;
+            font-size: 2rem;
         }
 
-        .welcome-subtitle {
-            color: var(--duo-text-light);
-            margin-bottom: 40px;
-            font-size: 1.1rem;
-        }
-
-        .input-group {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .name-input {
-            width: 100%;
+        input[type="text"] {
+            font-family: var(--font-main);
             padding: 15px;
-            font-size: 1.2rem;
             border: 2px solid var(--duo-gray);
-            border-radius: 12px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            width: 80%;
+            margin-bottom: 20px;
             text-align: center;
             outline: none;
-            transition: border-color 0.3s;
-            color: var(--duo-text);
+            transition: border-color 0.2s;
         }
 
-        .name-input:focus {
+        input[type="text"]:focus {
             border-color: var(--duo-blue);
         }
 
-        /* --- SCREEN 2: QUIZ (Existing Styles) --- */
+        /* --- Quiz Screen --- */
         #quiz-screen {
-            display: none; /* Hidden by default */
+            display: none;
             flex-direction: column;
             height: 100%;
         }
 
-        header {
-            padding: 16px 20px;
+        .header-bar {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
         }
 
-        .progress-container {
-            flex-grow: 1;
-            height: 16px;
+        .progress-bar-bg {
             background-color: var(--duo-gray);
+            height: 16px;
             border-radius: 8px;
-            margin-right: 15px;
+            flex-grow: 1;
+            margin-left: 15px;
             overflow: hidden;
         }
 
-        .progress-bar {
-            height: 100%;
+        .progress-bar-fill {
             background-color: var(--duo-green);
-            width: 0%;
+            height: 100%;
+            width: 0%; /* JS will update this */
             transition: width 0.5s ease;
             border-radius: 8px;
         }
 
-        .stats {
-            color: var(--duo-green);
-            font-weight: 800;
-            font-size: 1.2rem;
-        }
-
-        main {
-            flex: 1;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            overflow-y: auto;
-        }
-
-        h2 {
-            color: var(--duo-text);
-            font-size: 1.5rem;
-            margin-bottom: 30px;
-        }
-
-        .definition-text {
+        .word-status {
+            font-size: 0.8rem;
+            color: var(--duo-blue);
             font-weight: 600;
-            color: var(--duo-text);
-            line-height: 1.5;
+            margin-bottom: 10px;
+            min-height: 20px;
+        }
+
+        .question-box {
             font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .blank {
+            display: inline-block;
+            border-bottom: 2px solid var(--duo-dark);
+            width: 80px;
+            text-align: center;
+            color: transparent;
         }
 
         .options-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 15px;
+            margin-bottom: auto; /* Pushes everything else down */
         }
 
-        @media (min-width: 480px) {
-            .options-grid { grid-template-columns: 1fr 1fr; }
-        }
-
-        .option-btn {
-            background: #fff;
+        /* --- Buttons --- */
+        .btn {
+            font-family: var(--font-main);
+            background-color: #fff;
             border: 2px solid var(--duo-gray);
-            border-bottom-width: 4px;
-            border-radius: 12px;
+            border-bottom: 4px solid var(--duo-gray);
+            border-radius: 16px;
             padding: 15px;
-            font-size: 1.1rem;
-            color: var(--duo-text);
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.1s;
-            text-align: center;
-        }
-
-        .option-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
-        .option-btn.selected { background-color: #ddf4ff; border-color: var(--duo-blue); color: var(--duo-blue-dark); }
-        .option-btn.correct { background-color: #d7ffb8; border-color: var(--duo-green); color: var(--duo-green-dark); }
-        .option-btn.wrong { background-color: #ffdfe0; border-color: var(--duo-red); color: var(--duo-red-dark); }
-
-        /* --- SCREEN 3: CONGRATULATIONS --- */
-        #completion-screen {
-            display: none;
-            flex: 1;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            text-align: center;
-            background-color: #d7ffb8; /* Light green bg */
-        }
-        
-        .completion-icon {
-            font-size: 6rem;
-            margin-bottom: 20px;
-        }
-
-        .completion-title {
-            color: var(--duo-green-dark);
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-
-        .completion-msg {
-            color: var(--duo-text);
-            font-size: 1.2rem;
-            margin-bottom: 30px;
-        }
-
-        /* --- SHARED COMPONENTS --- */
-        .bottom-sheet {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
+            text-align: left;
+            color: var(--duo-dark);
             width: 100%;
-            max-width: 600px;
-            padding: 20px;
-            border-top: 2px solid transparent;
-            display: none;
-            flex-direction: column;
-            z-index: 100;
         }
 
-        .bottom-sheet.correct { background-color: #d7ffb8; color: var(--duo-green-dark); display: flex; }
-        .bottom-sheet.wrong { background-color: #ffdfe0; color: var(--duo-red-dark); display: flex; }
+        .btn:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
 
-        .feedback-header { font-weight: 800; font-size: 1.5rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-        .feedback-text { font-size: 1rem; margin-bottom: 20px; color: var(--duo-text); }
-        .example-sentence { font-style: italic; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 15px; }
+        .btn.selected {
+            background-color: #ddf4ff;
+            border-color: var(--duo-blue);
+            border-bottom-color: var(--duo-blue-shadow);
+            color: var(--duo-blue-shadow);
+        }
 
-        .action-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
+        .btn.correct {
+            background-color: #d7ffb8;
+            border-color: var(--duo-green);
+            border-bottom-color: var(--duo-green-shadow);
+            color: var(--duo-green-shadow);
+        }
+
+        .btn.wrong {
+            background-color: #ffdfe0;
+            border-color: var(--duo-red);
+            border-bottom-color: var(--duo-red-shadow);
+            color: var(--duo-red-shadow);
+        }
+
+        .btn-primary {
+            background-color: var(--duo-green);
+            color: white;
+            border-color: var(--duo-green);
+            border-bottom-color: var(--duo-green-shadow);
+            text-align: center;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            border: none;
-            border-bottom: 4px solid;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: filter 0.2s;
-        }
-
-        .start-btn { background-color: var(--duo-blue); color: white; border-color: var(--duo-blue-dark); }
-        .check-btn { background-color: var(--duo-green); color: white; border-color: var(--duo-green-dark); margin-top: auto; }
-        .check-btn:disabled { background-color: var(--duo-gray); border-color: #bfbfbf; color: #afafaf; cursor: not-allowed; }
-        .continue-btn { background-color: var(--duo-green); color: white; border-color: var(--duo-green-dark); }
-        .bottom-sheet.wrong .continue-btn { background-color: var(--duo-red); border-color: var(--duo-red-dark); }
-
-        .badge { font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; margin-left: 5px; text-transform: uppercase; display: inline-block;}
-        .badge-new { background: #eee; color: #777; }
-        .badge-maintained { background: #ffbd00; color: #fff; }
-        .badge-mastered { background: var(--duo-blue); color: #fff; }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            letter-spacing: 1px;
         }
         
-        @media (max-height: 600px) {
-            h2 { font-size: 1.2rem; margin-bottom: 15px; }
-            .option-btn { padding: 10px; }
-            .mascot { font-size: 3rem; }
+        .btn-primary:hover {
+            background-color: #61e002;
+        }
+
+        /* --- Feedback Footer --- */
+        .footer-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #fff; /* Default hidden bg */
+            border-top: 2px solid transparent;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 10;
+        }
+
+        .footer-area.show {
+            transform: translateY(0);
+        }
+
+        .footer-area.correct {
+            background-color: #d7ffb8;
+            border-color: #b7e890;
+            color: var(--duo-green-shadow);
+        }
+
+        .footer-area.wrong {
+            background-color: #ffdfe0;
+            border-color: #ffc1c1;
+            color: var(--duo-red-shadow);
+        }
+
+        .feedback-content {
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .feedback-title {
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .feedback-text {
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        /* Desktop View Adjustments */
+        @media (min-width: 768px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .container {
+                justify-content: center;
+            }
+            #quiz-screen {
+                justify-content: center;
+            }
+            .question-box {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="screen-container">
-    
-    <div id="welcome-screen">
-        <div class="mascot">🦉</div>
-        <h1 class="welcome-title">Vocab Master</h1>
-        <p class="welcome-subtitle">Memorize 50+ difficult words with spaced repetition.</p>
-        
-        <div class="input-group">
-            <input type="text" id="username-input" class="name-input" placeholder="What is your name?" autocomplete="off">
+    <div class="container">
+        <div id="welcome-screen">
+            <h1>VOCAB MASTER</h1>
+            <p>50 Words. 4 Levels of Mastery.</p>
+            <br>
+            <input type="text" id="username-input" placeholder="Enter your name">
+            <button class="btn btn-primary" id="start-btn">Start Learning</button>
         </div>
-        
-        <button id="start-btn" class="action-btn start-btn">Get Started</button>
-    </div>
 
-    <div id="quiz-screen">
-        <header>
-            <div class="progress-container">
-                <div class="progress-bar" id="mastery-bar"></div>
+        <div id="quiz-screen">
+            <div class="header-bar">
+                <div style="font-weight: 800; color: var(--duo-gray-text);">X</div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-bar"></div>
+                </div>
             </div>
-            <div class="stats">
-                <span id="remaining-count">0</span> Left
-            </div>
-        </header>
-
-        <main id="quiz-area">
-            <h2>Select the correct word</h2>
             
-            <div style="margin-bottom: 20px;">
-                <p class="definition-text" id="question-text">...</p>
+            <div class="word-status" id="word-status"></div>
+            <div class="question-box" id="question-text">
+                Loading...
             </div>
 
             <div class="options-grid" id="options-container">
                 </div>
+        </div>
 
-            <div style="flex: 1"></div>
-            <div style="padding: 20px; width: 100%;">
-                <button id="check-btn" class="action-btn check-btn" disabled>Check</button>
-            </div>
-        </main>
+        <div id="end-screen" style="display: none;">
+            <h1>CONGRATULATIONS!</h1>
+            <h2 id="congrats-name" style="color: var(--duo-blue);"></h2>
+            <p>You have cleared the list!</p>
+            <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
+        </div>
     </div>
 
-    <div id="completion-screen">
-        <div class="completion-icon">🏆</div>
-        <div class="completion-title">Congratulations <span id="final-user-name"></span>!</div>
-        <p class="completion-msg">You have successfully mastered the entire vocabulary list.</p>
-        <button onclick="location.reload()" class="action-btn continue-btn">Practice Again</button>
+    <div class="footer-area" id="footer">
+        <div class="feedback-content">
+            <div class="feedback-title" id="feedback-title">Correct!</div>
+            <div class="feedback-text" id="feedback-definition">Definition goes here.</div>
+            <button class="btn btn-primary" id="next-btn">CONTINUE</button>
+        </div>
     </div>
 
-    <div id="feedback-sheet" class="bottom-sheet">
-        <div class="feedback-header" id="feedback-title"></div>
-        <div class="feedback-text" id="feedback-detail"></div>
-        <div class="example-sentence" id="feedback-example"></div>
-        <button id="continue-btn" class="action-btn continue-btn">Continue</button>
-    </div>
+    <script>
+        // --- DATA ---
+        // Simplified structure based on user list.
+        const rawData = [
+            { w: "Abate", d: "To reduce, lessen", s: "The rain poured down for a while, then abated." },
+            { w: "Aberration", d: "Something that differs from the norm", s: "The sudden drop in temperature was an aberration for this time of year." },
+            { w: "Abhor", d: "To hate, detest", s: "Because he always wound up kicking himself in the head, Oswald began to abhor the sport." },
+            { w: "Acumen", d: "Keen insight", s: "Because of his mathematical acumen, Larry was able to figure out problems instantly." },
+            { w: "Adamant", d: "Impervious, immovable, unyielding", s: "Though public pressure was intense, the President remained adamant about his proposal." },
+            { w: "Aesthetic", d: "Artistic, related to appreciation of beauty", s: "We hired Susan as our interior decorator because she has such a fine aesthetic sense." },
+            { w: "Alacrity", d: "Eagerness, speed", s: "When his mother asked him to set the table he did so with alacrity." },
+            { w: "Ameliorate", d: "To improve", s: "The tense situation was ameliorated when Sam proposed a solution everyone could agree upon." },
+            { w: "Anachronistic", d: "Being out of correct chronological order", s: "Saying the Pyramids were built after the Titanic sank is anachronistic." },
+            { w: "Anomaly", d: "Something that does not fit into the normal order", s: "That rip in the space-time continuum is certainly a spatial anomaly." },
+            { w: "Antipathy", d: "A strong dislike, repugnance", s: "I know you love me, but because you are a liar, I feel nothing but antipathy for you." },
+            { w: "Arcane", d: "Obscure, secret, known only by a few", s: "The professor is an expert in arcane Lithuanian literature." },
+            { w: "Ascetic", d: "Practicing restraint, usually religious", s: "The priest lives an ascetic life devoid of television and savory foods." },
+            { w: "Assiduous", d: "Hard-working, diligent", s: "The construction workers erected the skyscraper during two years of assiduous labor." },
+            { w: "Banal", d: "Dull, commonplace", s: "The client rejected our proposal because they found our presentation banal." },
+            { w: "Benevolent", d: "Marked by goodness or doing good", s: "Police officers should be commended for their benevolent service." },
+            { w: "Boisterous", d: "Loud and full of energy", s: "The candidate won the vote after giving several boisterous speeches." },
+            { w: "Brazen", d: "Excessively bold, brash", s: "Critics condemned the novelist’s brazen attempt to plagiarize." },
+            { w: "Brusque", d: "Short, abrupt, dismissive", s: "The captain’s brusque manner offended the passengers." },
+            { w: "Cacophony", d: "Tremendous noise, disharmonious sound", s: "The elementary school orchestra created a cacophony at the recital." },
+            { w: "Candor", d: "Honesty, frankness", s: "We were surprised by the candor of the mayor’s speech because he is usually evasive." },
+            { w: "Capricious", d: "Subject to whim, fickle", s: "The young girl’s capricious tendencies made it difficult for her to focus." },
+            { w: "Caustic", d: "Bitter, biting, acidic", s: "The politicians exchanged caustic insults for over an hour." },
+            { w: "Clandestine", d: "Secret", s: "Sophie actually went to meet Joseph for a clandestine liaison." },
+            { w: "Cogent", d: "Intellectually convincing", s: "Irene’s arguments were so cogent that I could not resist them." },
+            { w: "Concomitant", d: "Accompanying in a subordinate fashion", s: "His dislike of hard work carried with it a concomitant lack of funds." },
+            { w: "Convivial", d: "Characterized by feasting, drinking, merriment", s: "The restaurant’s convivial atmosphere put me immediately at ease." },
+            { w: "Credulity", d: "Readiness to believe", s: "His credulity made him an easy target for con men." },
+            { w: "Dearth", d: "A lack, scarcity", s: "An eager reader, she was dismayed by the dearth of classic books." },
+            { w: "Debacle", d: "A disastrous failure, disruption", s: "The fireworks show turned into a debacle when they started firing randomly." },
+            { w: "Deleterious", d: "Harmful", s: "She experienced the deleterious effects of running without stretching." },
+            { w: "Despot", d: "One who has total power and rules brutally", s: "The despot issued a death sentence for anyone who disobeyed." },
+            { w: "Didactic", d: "Intended to instruct", s: "She wrote up a didactic document showing new employees how to handle customers." },
+            { w: "Disparate", d: "Sharply differing", s: "Having widely varying interests, the students had disparate responses." },
+            { w: "Ebullient", d: "Extremely lively, enthusiastic", s: "She became ebullient upon receiving an acceptance letter." },
+            { w: "Eclectic", d: "Consisting of a diverse variety of elements", s: "That bar attracts an eclectic crowd: lawyers, artists, and clowns." },
+            { w: "Egregious", d: "Extremely bad", s: "The student was punished for his egregious behavior in the cafeteria." },
+            { w: "Eloquent", d: "Expressive, articulate, moving", s: "The priest gave such an eloquent sermon that most churchgoers were crying." },
+            { w: "Enervate", d: "To weaken, exhaust", s: "Writing these sentences enervates me so much that I will have to take a nap." },
+            { w: "Ephemeral", d: "Short-lived, fleeting", s: "Her 'forever' was only ephemeral; she left me after one week." },
+            { w: "Esoteric", d: "Understood by only a select few", s: "Even advanced students cannot understand the physicist’s esoteric theories." },
+            { w: "Evanescent", d: "Fleeting, momentary", s: "My joy was evanescent because I discovered I would have to work longer hours." },
+            { w: "Fastidious", d: "Meticulous, demanding", s: "Mark is so fastidious that the project always seems imperfect to him." },
+            { w: "Furtive", d: "Secretive, sly", s: "Jane’s placement of her drugs in her sock drawer was not as furtive as she thought." },
+            { w: "Garrulous", d: "Talkative, wordy", s: "Some talk show hosts are so garrulous that guests can’t get a word in." },
+            { w: "Gregarious", d: "Drawn to the company of others, sociable", s: "If you’re not gregarious, I don’t know why you would want to go to a singles party!" },
+            { w: "Hackneyed", d: "Unoriginal, trite", s: "A girl can only hear 'I love you' so many times before it sounds hackneyed." },
+            { w: "Iconoclast", d: "One who attacks common beliefs", s: "Jane seems to be an iconoclast rather than an activist." },
+            { w: "Impetuous", d: "Rash; hastily done", s: "Hilda’s hasty slaying of the king was an impetuous action." },
+            { w: "Incessant", d: "Unending", s: "The incessant rain kept us indoors for two days." }
+        ];
 
-</div>
+        // --- STATE MANAGEMENT ---
+        let appState = {
+            user: "",
+            words: [], // { id, word, def, sentence, correctCount, consecutive, isDeleted }
+            currentQuestion: null, // { wordObj, distractors, maskedSentence }
+            isWaitingForNext: false
+        };
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-
-<script>
-    // --- 1. Data Initialization ---
-    const rawData = [
-        {w:"foster", p:"v.", d:"to stimulate, promote, encourage", s:"To foster good health in the city, the mayor started a “Get out and exercise!” campaign."},
-        {w:"fractious", p:"adj.", d:"troublesome or irritable", s:"Although the child insisted he wasn’t tired, his fractious behavior—especially his decision to crush his cheese and crackers all over the ﬂoor—convinced everyone present that it was time to put him to bed."},
-        {w:"fraught", p:"adj.", d:"ﬁlled or accompanied with (usually used with “with”)", s:"Her glances in his direction were fraught with meaning, though precisely what meaning remained unclear."},
-        {w:"frenetic", p:"adj.", d:"frenzied, hectic, frantic", s:"In the hours between night and morning, the frenetic pace of city life slows to a lull."},
-        {w:"frivolous", p:"adj.", d:"of little importance, triﬂing", s:"Someday, all that anxiety about whether your zit will disappear before the prom will seem totally frivolous."},
-        {w:"frugal", p:"adj.", d:"thrifty, economical", s:"Richard is so frugal that his diet consists almost exclusively of catﬁsh and chicken liver—the two most inexpensive foods in the store."},
-        {w:"furtive", p:"adj.", d:"secretive, sly", s:"Jane’s placement of her drugs in her sock drawer was not as furtive as she thought, as the sock drawer is the ﬁrst place most parents look."},
-        {w:"garish", p:"adj.", d:"gaudy, in bad taste", s:"Mrs. Watson has poor taste and covers every object in her house with a garish gold lamé."},
-        {w:"garrulous", p:"adj.", d:"talkative, wordy", s:"Some talk show hosts are so garrulous that their guests can’t get a word in edgewise."},
-        {w:"genial", p:"adj.", d:"friendly, affable", s:"Although he’s been known to behave like a real jerk, I would say that my brother is an overall genial guy."},
-        {w:"gluttony", p:"n.", d:"overindulgence in food or drink", s:"Ada’s fried chicken tastes so divine, I don’t know how anyone can call gluttony a sin."},
-        {w:"goad", p:"v.", d:"to urge, spur, incite to action", s:"Jim may think he’s not going to ﬁght Billy, but Billy will goad Jim on with insults until he throws a punch."},
-        {w:"gourmand", p:"n.", d:"someone fond of eating and drinking", s:"My parents, who used to eat little more than crackers and salad, have become real gourmands in their old age."},
-        {w:"grandiloquence", p:"n.", d:"lofty, pompous language", s:"The student thought her grandiloquence would make her sound smart, but neither the class nor the teacher bought it."},
-        {w:"grandiose", p:"adj.", d:"on a magniﬁcent or exaggerated scale", s:"Margaret planned a grandiose party, replete with elephants, trapeze artists, and clowns."},
-        {w:"gratuitous", p:"adj.", d:"uncalled for, unwarranted", s:"Every morning the guy at the donut shop gives me a gratuitous helping of ketchup packets."},
-        {w:"gregarious", p:"adj.", d:"drawn to the company of others, sociable", s:"Well, if you’re not gregarious, I don’t know why you would want to go to a singles party!"},
-        {w:"grievous", p:"adj.", d:"injurious, hurtful; serious or grave in nature", s:"Electrocuting the inmate without being sure of his guilt would be a truly grievous mistake."},
-        {w:"guile", p:"n.", d:"deceitful, cunning, sly behavior", s:"Because of his great guile, the politician was able to survive scandal after scandal."},
-        {w:"hackneyed", p:"adj.", d:"unoriginal, trite", s:"A girl can only hear “I love you” so many times before it begins to sound hackneyed and meaningless."},
-        {w:"hallowed", p:"adj.", d:"revered, consecrated", s:"In the hallowed corridors of the cathedral, the disturbed professor felt himself to be at peace."},
-        {w:"hapless", p:"adj.", d:"unlucky", s:"My poor, hapless family never seems to pick a sunny week to go on vacation."},
-        {w:"harangue", p:"n.", d:"a ranting speech", s:"Everyone had heard the teacher’s harangue about gum chewing in class before."},
-        {w:"hardy", p:"adj.", d:"robust, capable of surviving through adverse conditions", s:"I too would have expected the plants to be dead by mid-November, but apparently they’re very hardy."},
-        {w:"harrowing", p:"adj.", d:"greatly distressing, vexing", s:"The car crash was a harrowing experience, but I have a feeling that the increase in my insurance premiums will be even more upsetting."},
-        {w:"haughty", p:"adj.", d:"disdainfully proud", s:"The superstar’s haughty dismissal of her costars will backﬁre on her someday."},
-        {w:"hedonist", p:"n.", d:"one who believes pleasure should be the primary pursuit of humans", s:"Because he’s such a hedonist, I knew Murray would appreciate the 11 cases of wine I bought him for his birthday."},
-        {w:"hegemony", p:"n.", d:"domination over others", s:"Britain’s hegemony over its colonies was threatened once nationalist sentiment began to spread around the world."},
-        {w:"heinous", p:"adj.", d:"shockingly wicked, repugnant", s:"The killings were made all the more heinous by the fact that the murderer ﬁrst tortured his victims for three days."},
-        {w:"heterogeneous", p:"adj.", d:"varied, diverse in character", s:"I hate having only one ﬂavor so I always buy the swirled, or should I say heterogeneous, type of ice cream."},
-        {w:"blandish", p:"v.", d:"to coax by using ﬂattery", s:"Rachel’s assistant tried to blandish her into accepting the deal."},
-        {w:"blemish", p:"n.", d:"an imperfection, ﬂaw", s:"The dealer agreed to lower the price because of the many blemishes on the surface of the wooden furniture."},
-        {w:"blight", p:"n.", d:"a plague, disease", s:"The potato blight destroyed the harvest and bankrupted many families."},
-        {w:"boisterous", p:"adj.", d:"loud and full of energy", s:"The candidate won the vote after giving several boisterous speeches on television."},
-        {w:"bombastic", p:"adj.", d:"excessively conﬁdent, pompous", s:"The singer’s bombastic performance disgusted the crowd."},
-        {w:"boon", p:"n.", d:"a gift or blessing", s:"The good weather has been a boon for many businesses located near the beach."},
-        {w:"bourgeois", p:"n.", d:"a middle-class person, capitalist", s:"Many businessmen receive criticism for their bourgeois approach to life."},
-        {w:"brazen", p:"adj.", d:"excessively bold, brash", s:"Critics condemned the novelist’s brazen attempt to plagiarize Hemingway’s story."},
-        {w:"brusque", p:"adj.", d:"short, abrupt, dismissive", s:"The captain’s brusque manner offended the passengers."},
-        {w:"buffet", p:"v.", d:"to strike with force", s:"The strong winds buffeted the ships, threatening to capsize them."},
-        {w:"burnish", p:"v.", d:"to polish, shine", s:"His mother asked him to burnish the silverware before setting the table."},
-        {w:"buttress", p:"v.", d:"to support, hold up", s:"The column buttresses the roof above the statue."},
-        {w:"cacophony", p:"n.", d:"tremendous noise, disharmonious sound", s:"The elementary school orchestra created a cacophony at the recital."},
-        {w:"cadence", p:"n.", d:"a rhythm, progression of sound", s:"The pianist used the foot pedal to emphasize the cadence of the sonata."},
-        {w:"cajole", p:"v.", d:"to urge, coax", s:"Fred’s buddies cajoled him into attending the bachelor party."},
-        {w:"calamity", p:"n.", d:"an event with disastrous consequences", s:"The earthquake in San Francisco was a calamity worse than any other natural disaster in history."},
-        {w:"calibrate", p:"v.", d:"to set, standardize", s:"The mechanic calibrated the car’s transmission to make the motor run most efﬁciently."},
-        {w:"callous", p:"adj.", d:"harsh, cold, unfeeling", s:"The murderer’s callous lack of remorse shocked the jury."},
-        {w:"calumny", p:"n.", d:"an attempt to spoil someone else’s reputation by spreading lies", s:"The local ofﬁcial’s calumny ended up ruining his opponent’s prospect of winning the election."},
-        {w:"camaraderie", p:"n.", d:"brotherhood, jovial unity", s:"Camaraderie among employees usually leads to success in business."},
-        {w:"candor", p:"n.", d:"honesty, frankness", s:"We were surprised by the candor of the mayor’s speech because he is usually rather evasive."},
-        {w:"canny", p:"adj.", d:"shrewd, careful", s:"The canny runner hung at the back of the pack through much of the race to watch the other runners, and then sprinted past them at the end."},
-        {w:"canvas", p:"n.", d:"a piece of cloth on which an artist paints", s:"Picasso liked to work on canvas rather than on bare cement."}
-    ];
-
-    // --- 2. State & Audio ---
-    let vocabList = rawData.map(item => ({...item, progress: 0}));
-    let currentItem = null;
-    let selectedOption = null;
-    let isAnswered = false;
-    let userName = "";
-
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    function playSound(type) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        const now = audioCtx.currentTime;
-
-        if (type === 'correct') {
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(600, now);
-            oscillator.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
-            gainNode.gain.setValueAtTime(0.3, now);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-            oscillator.start();
-            oscillator.stop(now + 0.4);
-        } else if (type === 'wrong') {
-            oscillator.type = 'sawtooth';
-            oscillator.frequency.setValueAtTime(150, now);
-            oscillator.frequency.exponentialRampToValueAtTime(80, now + 0.3);
-            gainNode.gain.setValueAtTime(0.3, now);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-            oscillator.start();
-            oscillator.stop(now + 0.3);
-        } else if (type === 'click') {
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(300, now);
-            gainNode.gain.setValueAtTime(0.1, now);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-            oscillator.start();
-            oscillator.stop(now + 0.05);
-        }
-    }
-
-    // --- 3. Screen Management ---
-    
-    function startApp() {
-        const input = document.getElementById('username-input');
-        userName = input.value.trim() || "Friend"; // Default if empty
+        // --- SOUND CONTROLLER (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        // Initialize Audio context on first user interaction
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        
-        document.getElementById('welcome-screen').style.display = 'none';
-        document.getElementById('quiz-screen').style.display = 'flex';
-        
-        generateQuestion();
-    }
-
-    function showCompletion() {
-        document.getElementById('quiz-screen').style.display = 'none';
-        document.getElementById('completion-screen').style.display = 'flex';
-        document.getElementById('final-user-name').innerText = userName;
-        
-        // Heavy celebration confetti
-        const duration = 3000;
-        const end = Date.now() + duration;
-
-        (function frame() {
-            confetti({
-                particleCount: 5,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 }
-            });
-            confetti({
-                particleCount: 5,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 }
-            });
-
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());
-        
-        playSound('correct');
-    }
-
-    // --- 4. Game Logic ---
-
-    function generateQuestion() {
-        // Filter out completed words (Level 4)
-        const activeWords = vocabList.filter(i => i.progress < 4);
-
-        if (activeWords.length === 0) {
-            showCompletion();
-            return;
-        }
-
-        // Pick random word
-        currentItem = activeWords[Math.floor(Math.random() * activeWords.length)];
-
-        // Pick distractors
-        const otherWords = rawData.filter(w => w.w !== currentItem.w);
-        const distractors = [];
-        while(distractors.length < 3) {
-            const r = otherWords[Math.floor(Math.random() * otherWords.length)];
-            if (!distractors.includes(r)) distractors.push(r);
-        }
-
-        // Shuffle options
-        const options = [currentItem, ...distractors];
-        for (let i = options.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [options[i], options[j]] = [options[j], options[i]];
-        }
-
-        renderUI(currentItem, options);
-    }
-
-    function renderUI(target, options) {
-        // Stats
-        const activeCount = vocabList.filter(i => i.progress < 4).length;
-        document.getElementById('remaining-count').innerText = activeCount;
-        
-        const totalLevels = rawData.length * 4;
-        const currentLevels = vocabList.reduce((acc, curr) => acc + curr.progress, 0);
-        document.getElementById('mastery-bar').style.width = `${(currentLevels/totalLevels)*100}%`;
-
-        // Question
-        const badgeLabel = ["New", "Learning", "Maintained", "Mastered"][target.progress];
-        const badgeClass = ["badge-new", "badge-new", "badge-maintained", "badge-mastered"][target.progress];
-        
-        document.getElementById('question-text').innerHTML = 
-            `(${target.p}) ${target.d} <span class="badge ${badgeClass}">${badgeLabel}</span>`;
-
-        // Options
-        const container = document.getElementById('options-container');
-        container.innerHTML = '';
-        
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt.w;
-            btn.onclick = () => selectOption(btn, opt.w);
-            container.appendChild(btn);
-        });
-
-        // Reset UI
-        selectedOption = null;
-        isAnswered = false;
-        document.getElementById('check-btn').innerText = "CHECK";
-        document.getElementById('check-btn').disabled = true;
-        document.getElementById('check-btn').style.display = 'block';
-        document.getElementById('feedback-sheet').style.display = 'none';
-        document.getElementById('feedback-sheet').className = 'bottom-sheet';
-    }
-
-    function selectOption(btnElement, word) {
-        if (isAnswered) return;
-        playSound('click');
-        
-        document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-        btnElement.classList.add('selected');
-        selectedOption = word;
-        document.getElementById('check-btn').disabled = false;
-    }
-
-    function checkAnswer() {
-        if (!selectedOption || isAnswered) return;
-        isAnswered = true;
-
-        const isCorrect = selectedOption === currentItem.w;
-        const buttons = document.querySelectorAll('.option-btn');
-        const checkBtn = document.getElementById('check-btn');
-        const feedbackSheet = document.getElementById('feedback-sheet');
-
-        buttons.forEach(btn => {
-            if (btn.innerText === currentItem.w) {
-                btn.classList.add('correct');
-            } else if (btn.innerText === selectedOption && !isCorrect) {
-                btn.classList.add('wrong');
-            }
-        });
-
-        if (isCorrect) {
-            currentItem.progress++;
-            playSound('correct');
-            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#58cc02', '#ffffff'] });
-            feedbackSheet.classList.add('correct');
-            document.getElementById('feedback-title').innerHTML = '<span style="font-size:1.5em">✓</span> Excellent!';
-        } else {
-            playSound('wrong');
-            feedbackSheet.classList.add('wrong');
-            document.getElementById('feedback-title').innerHTML = '<span style="font-size:1.5em">✖</span> Correct: ' + currentItem.w;
-        }
-
-        document.getElementById('feedback-detail').innerText = currentItem.d;
-        document.getElementById('feedback-example').innerHTML = `"${currentItem.s}"`;
-
-        checkBtn.style.display = 'none';
-        feedbackSheet.style.display = 'flex';
-        document.getElementById('continue-btn').focus();
-    }
-
-    // --- 5. Event Listeners ---
-
-    document.getElementById('start-btn').addEventListener('click', startApp);
-    document.getElementById('check-btn').addEventListener('click', checkAnswer);
-    document.getElementById('continue-btn').addEventListener('click', () => {
-        playSound('click');
-        generateQuestion();
-    });
-
-    // Enter Key Logic
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const welcomeVisible = document.getElementById('welcome-screen').style.display !== 'none';
-            const quizVisible = document.getElementById('quiz-screen').style.display === 'flex';
+        const playSound = (type) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             
-            if (welcomeVisible) {
-                startApp();
-            } else if (quizVisible) {
-                if (!isAnswered && selectedOption) {
-                    checkAnswer();
-                } else if (isAnswered) {
-                    playSound('click');
-                    generateQuestion();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            if (type === 'correct') {
+                // High ding
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } else if (type === 'wrong') {
+                // Low buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } else if (type === 'finish') {
+                 // Victory Arpeggio
+                const now = audioCtx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.frequency.value = freq;
+                    o.type = 'triangle';
+                    g.gain.setValueAtTime(0.2, now + i*0.1);
+                    g.gain.exponentialRampToValueAtTime(0.001, now + i*0.1 + 0.5);
+                    o.start(now + i*0.1);
+                    o.stop(now + i*0.1 + 0.5);
+                });
+            }
+        };
+
+        // --- INITIALIZATION ---
+        function init() {
+            // Initialize word list with stats
+            appState.words = rawData.map((item, index) => ({
+                id: index,
+                word: item.w,
+                def: item.d,
+                sentence: item.s,
+                correctCount: 0,
+                consecutive: 0,
+                isDeleted: false
+            }));
+
+            // DOM Elements
+            const startBtn = document.getElementById('start-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const usernameInput = document.getElementById('username-input');
+
+            startBtn.addEventListener('click', startGame);
+            nextBtn.addEventListener('click', nextQuestion);
+
+            // Keydown listener for Enter
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    if (appState.isWaitingForNext) {
+                        nextQuestion();
+                    } else if (document.getElementById('welcome-screen').style.display !== 'none') {
+                        startGame();
+                    }
+                }
+            });
+        }
+
+        function startGame() {
+            const input = document.getElementById('username-input');
+            const name = input.value.trim() || "Learner";
+            appState.user = name;
+
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'flex';
+            
+            generateQuestion();
+        }
+
+        // --- GAME LOGIC ---
+        function generateQuestion() {
+            // Filter available words (not deleted)
+            const availablePool = appState.words.filter(w => !w.isDeleted);
+
+            if (availablePool.length === 0) {
+                showEndScreen();
+                return;
+            }
+
+            // Pick a random word
+            // Improved selection: Prioritize words seen less often or maintained words to verify
+            const targetWord = availablePool[Math.floor(Math.random() * availablePool.length)];
+
+            // Create Masked Sentence
+            // Regex to find the word, case insensitive, and masking it
+            const regex = new RegExp(targetWord.word.substring(0, 4), 'i'); // Match first 4 chars to handle tenses loosely
+            const maskedSentence = targetWord.sentence.replace(regex, "_______");
+
+            // Pick 3 distractors
+            const distractors = [];
+            while (distractors.length < 3) {
+                const r = rawData[Math.floor(Math.random() * rawData.length)];
+                if (r.w !== targetWord.word && !distractors.includes(r.w)) {
+                    distractors.push(r.w);
                 }
             }
-        }
-    });
 
-</script>
+            // Shuffle options
+            const options = [...distractors, targetWord.word].sort(() => Math.random() - 0.5);
+
+            appState.currentQuestion = {
+                wordObj: targetWord,
+                maskedSentence: maskedSentence,
+                options: options
+            };
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            appState.isWaitingForNext = false;
+
+            // Reset UI
+            document.getElementById('footer').classList.remove('show', 'correct', 'wrong');
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            // Status Indicator
+            const w = appState.currentQuestion.wordObj;
+            const statusEl = document.getElementById('word-status');
+            if (w.correctCount >= 3) {
+                statusEl.innerHTML = "🔥 MASTERED (Next correct removes it)";
+                statusEl.style.color = "orange";
+            } else if (w.consecutive >= 2) {
+                statusEl.innerHTML = "✨ MAINTAINED";
+                statusEl.style.color = "var(--duo-blue)";
+            } else {
+                statusEl.innerHTML = "🌱 NEW / LEARNING";
+                statusEl.style.color = "var(--duo-gray-text)";
+            }
+
+            // Sentence
+            document.getElementById('question-text').innerHTML = appState.currentQuestion.maskedSentence;
+
+            // Options
+            appState.currentQuestion.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(btn, opt);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Update Progress Bar
+            updateProgressBar();
+        }
+
+        function handleAnswer(btnElement, selectedOption) {
+            if (appState.isWaitingForNext) return; // Prevent multiple clicks
+
+            const correctWord = appState.currentQuestion.wordObj.word;
+            const isCorrect = selectedOption === correctWord;
+            
+            // UI Update
+            const allBtns = document.querySelectorAll('.options-grid .btn');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                if (b.innerText === correctWord) b.classList.add('correct');
+                else if (b === btnElement && !isCorrect) b.classList.add('wrong');
+            });
+
+            // Logic Update
+            updateWordStats(isCorrect);
+
+            // Feedback Footer
+            const footer = document.getElementById('footer');
+            const title = document.getElementById('feedback-title');
+            const text = document.getElementById('feedback-definition');
+            
+            footer.classList.remove('correct', 'wrong');
+            if (isCorrect) {
+                footer.classList.add('correct');
+                title.innerText = "Nicely done!";
+                playSound('correct');
+            } else {
+                footer.classList.add('wrong');
+                title.innerText = "Correct answer: " + correctWord;
+                playSound('wrong');
+            }
+
+            text.innerHTML = `<strong>Definition:</strong> ${appState.currentQuestion.wordObj.def}`;
+            footer.classList.add('show');
+            
+            appState.isWaitingForNext = true;
+        }
+
+        function updateWordStats(isCorrect) {
+            const word = appState.currentQuestion.wordObj;
+
+            if (isCorrect) {
+                word.consecutive++;
+                word.correctCount++;
+                
+                // Rule 3: 4th time right -> Delete
+                if (word.correctCount >= 4) {
+                    word.isDeleted = true;
+                }
+            } else {
+                // Rule 4: Wrong -> Reset consecutive, but not total count
+                word.consecutive = 0;
+            }
+        }
+
+        function nextQuestion() {
+            if (!appState.isWaitingForNext) return;
+            generateQuestion();
+        }
+
+        function updateProgressBar() {
+            // Calculate progress based on deleted words
+            const total = appState.words.length;
+            const deleted = appState.words.filter(w => w.isDeleted).length;
+            const percentage = (deleted / total) * 100;
+            document.getElementById('progress-bar').style.width = percentage + '%';
+        }
+
+        function showEndScreen() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'flex';
+            document.getElementById('congrats-name').innerText = appState.user;
+            playSound('finish');
+        }
+
+        // Run
+        init();
+
+    </script>
 </body>
 </html>

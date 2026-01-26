@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocab Master</title>
+    <title>Vocab Master: Nunito Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --duo-green: #58cc02;
@@ -17,14 +17,14 @@
             --duo-blue-shadow: #1899d6;
             --duo-gray: #e5e5e5;
             --duo-gray-text: #afafaf;
-            --duo-dark: #3c3c3c;
+            --duo-dark: #4b4b4b;
             --bg-color: #fff;
-            --font-main: 'Martian Mono', monospace;
+            --font-main: 'Nunito', sans-serif;
         }
 
         * {
             box-sizing: border-box;
-            touch-action: manipulation; /* Improves touch response on mobile */
+            touch-action: manipulation;
         }
 
         body {
@@ -44,7 +44,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 600px; /* Mobile first logic, constrained width for desktop */
+            max-width: 600px;
             width: 100%;
             margin: 0 auto;
             padding: 20px;
@@ -64,8 +64,15 @@
         h1 {
             font-weight: 800;
             color: var(--duo-green);
-            margin-bottom: 2rem;
-            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #777;
         }
 
         input[type="text"] {
@@ -79,6 +86,7 @@
             text-align: center;
             outline: none;
             transition: border-color 0.2s;
+            font-weight: 600;
         }
 
         input[type="text"]:focus {
@@ -111,29 +119,32 @@
         .progress-bar-fill {
             background-color: var(--duo-green);
             height: 100%;
-            width: 0%; /* JS will update this */
+            width: 0%;
             transition: width 0.5s ease;
             border-radius: 8px;
         }
 
         .word-status {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--duo-blue);
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 10px;
             min-height: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .question-box {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             line-height: 1.6;
             margin-bottom: 30px;
-            font-weight: 400;
+            font-weight: 600;
+            color: #3c3c3c;
         }
 
         .blank {
             display: inline-block;
-            border-bottom: 2px solid var(--duo-dark);
+            border-bottom: 3px solid var(--duo-gray);
             width: 80px;
             text-align: center;
             color: transparent;
@@ -143,7 +154,7 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 15px;
-            margin-bottom: auto; /* Pushes everything else down */
+            margin-bottom: auto;
         }
 
         /* --- Buttons --- */
@@ -153,13 +164,14 @@
             border: 2px solid var(--duo-gray);
             border-bottom: 4px solid var(--duo-gray);
             border-radius: 16px;
-            padding: 15px;
-            font-size: 1rem;
+            padding: 15px 20px;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.1s;
             text-align: left;
             color: var(--duo-dark);
             width: 100%;
+            font-weight: 600;
         }
 
         .btn:active {
@@ -209,7 +221,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: #fff; /* Default hidden bg */
+            background-color: #fff;
             border-top: 2px solid transparent;
             padding: 20px;
             display: flex;
@@ -246,13 +258,14 @@
 
         .feedback-title {
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             margin-bottom: 5px;
         }
 
         .feedback-text {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             margin-bottom: 15px;
+            font-weight: 400;
         }
 
         /* Desktop View Adjustments */
@@ -267,7 +280,7 @@
                 justify-content: center;
             }
             .question-box {
-                font-size: 1.4rem;
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -277,7 +290,7 @@
     <div class="container">
         <div id="welcome-screen">
             <h1>VOCAB MASTER</h1>
-            <p>50 Words. 4 Levels of Mastery.</p>
+            <p>50 New Words.<br>Nunito Style.<br>Let's do this.</p>
             <br>
             <input type="text" id="username-input" placeholder="Enter your name">
             <button class="btn btn-primary" id="start-btn">Start Learning</button>
@@ -285,7 +298,7 @@
 
         <div id="quiz-screen">
             <div class="header-bar">
-                <div style="font-weight: 800; color: var(--duo-gray-text);">X</div>
+                <div onclick="location.reload()" style="font-weight: 800; color: var(--duo-gray-text); cursor:pointer;">X</div>
                 <div class="progress-bar-bg">
                     <div class="progress-bar-fill" id="progress-bar"></div>
                 </div>
@@ -304,6 +317,7 @@
             <h1>CONGRATULATIONS!</h1>
             <h2 id="congrats-name" style="color: var(--duo-blue);"></h2>
             <p>You have cleared the list!</p>
+            <br>
             <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
         </div>
     </div>
@@ -318,65 +332,65 @@
 
     <script>
         // --- DATA ---
-        // Simplified structure based on user list.
         const rawData = [
-            { w: "Abate", d: "To reduce, lessen", s: "The rain poured down for a while, then abated." },
-            { w: "Aberration", d: "Something that differs from the norm", s: "The sudden drop in temperature was an aberration for this time of year." },
-            { w: "Abhor", d: "To hate, detest", s: "Because he always wound up kicking himself in the head, Oswald began to abhor the sport." },
-            { w: "Acumen", d: "Keen insight", s: "Because of his mathematical acumen, Larry was able to figure out problems instantly." },
-            { w: "Adamant", d: "Impervious, immovable, unyielding", s: "Though public pressure was intense, the President remained adamant about his proposal." },
-            { w: "Aesthetic", d: "Artistic, related to appreciation of beauty", s: "We hired Susan as our interior decorator because she has such a fine aesthetic sense." },
-            { w: "Alacrity", d: "Eagerness, speed", s: "When his mother asked him to set the table he did so with alacrity." },
-            { w: "Ameliorate", d: "To improve", s: "The tense situation was ameliorated when Sam proposed a solution everyone could agree upon." },
-            { w: "Anachronistic", d: "Being out of correct chronological order", s: "Saying the Pyramids were built after the Titanic sank is anachronistic." },
-            { w: "Anomaly", d: "Something that does not fit into the normal order", s: "That rip in the space-time continuum is certainly a spatial anomaly." },
-            { w: "Antipathy", d: "A strong dislike, repugnance", s: "I know you love me, but because you are a liar, I feel nothing but antipathy for you." },
-            { w: "Arcane", d: "Obscure, secret, known only by a few", s: "The professor is an expert in arcane Lithuanian literature." },
-            { w: "Ascetic", d: "Practicing restraint, usually religious", s: "The priest lives an ascetic life devoid of television and savory foods." },
-            { w: "Assiduous", d: "Hard-working, diligent", s: "The construction workers erected the skyscraper during two years of assiduous labor." },
-            { w: "Banal", d: "Dull, commonplace", s: "The client rejected our proposal because they found our presentation banal." },
-            { w: "Benevolent", d: "Marked by goodness or doing good", s: "Police officers should be commended for their benevolent service." },
-            { w: "Boisterous", d: "Loud and full of energy", s: "The candidate won the vote after giving several boisterous speeches." },
-            { w: "Brazen", d: "Excessively bold, brash", s: "Critics condemned the novelist’s brazen attempt to plagiarize." },
-            { w: "Brusque", d: "Short, abrupt, dismissive", s: "The captain’s brusque manner offended the passengers." },
-            { w: "Cacophony", d: "Tremendous noise, disharmonious sound", s: "The elementary school orchestra created a cacophony at the recital." },
-            { w: "Candor", d: "Honesty, frankness", s: "We were surprised by the candor of the mayor’s speech because he is usually evasive." },
-            { w: "Capricious", d: "Subject to whim, fickle", s: "The young girl’s capricious tendencies made it difficult for her to focus." },
-            { w: "Caustic", d: "Bitter, biting, acidic", s: "The politicians exchanged caustic insults for over an hour." },
-            { w: "Clandestine", d: "Secret", s: "Sophie actually went to meet Joseph for a clandestine liaison." },
-            { w: "Cogent", d: "Intellectually convincing", s: "Irene’s arguments were so cogent that I could not resist them." },
-            { w: "Concomitant", d: "Accompanying in a subordinate fashion", s: "His dislike of hard work carried with it a concomitant lack of funds." },
-            { w: "Convivial", d: "Characterized by feasting, drinking, merriment", s: "The restaurant’s convivial atmosphere put me immediately at ease." },
-            { w: "Credulity", d: "Readiness to believe", s: "His credulity made him an easy target for con men." },
-            { w: "Dearth", d: "A lack, scarcity", s: "An eager reader, she was dismayed by the dearth of classic books." },
-            { w: "Debacle", d: "A disastrous failure, disruption", s: "The fireworks show turned into a debacle when they started firing randomly." },
-            { w: "Deleterious", d: "Harmful", s: "She experienced the deleterious effects of running without stretching." },
-            { w: "Despot", d: "One who has total power and rules brutally", s: "The despot issued a death sentence for anyone who disobeyed." },
-            { w: "Didactic", d: "Intended to instruct", s: "She wrote up a didactic document showing new employees how to handle customers." },
-            { w: "Disparate", d: "Sharply differing", s: "Having widely varying interests, the students had disparate responses." },
-            { w: "Ebullient", d: "Extremely lively, enthusiastic", s: "She became ebullient upon receiving an acceptance letter." },
-            { w: "Eclectic", d: "Consisting of a diverse variety of elements", s: "That bar attracts an eclectic crowd: lawyers, artists, and clowns." },
-            { w: "Egregious", d: "Extremely bad", s: "The student was punished for his egregious behavior in the cafeteria." },
-            { w: "Eloquent", d: "Expressive, articulate, moving", s: "The priest gave such an eloquent sermon that most churchgoers were crying." },
-            { w: "Enervate", d: "To weaken, exhaust", s: "Writing these sentences enervates me so much that I will have to take a nap." },
-            { w: "Ephemeral", d: "Short-lived, fleeting", s: "Her 'forever' was only ephemeral; she left me after one week." },
-            { w: "Esoteric", d: "Understood by only a select few", s: "Even advanced students cannot understand the physicist’s esoteric theories." },
-            { w: "Evanescent", d: "Fleeting, momentary", s: "My joy was evanescent because I discovered I would have to work longer hours." },
-            { w: "Fastidious", d: "Meticulous, demanding", s: "Mark is so fastidious that the project always seems imperfect to him." },
-            { w: "Furtive", d: "Secretive, sly", s: "Jane’s placement of her drugs in her sock drawer was not as furtive as she thought." },
-            { w: "Garrulous", d: "Talkative, wordy", s: "Some talk show hosts are so garrulous that guests can’t get a word in." },
-            { w: "Gregarious", d: "Drawn to the company of others, sociable", s: "If you’re not gregarious, I don’t know why you would want to go to a singles party!" },
-            { w: "Hackneyed", d: "Unoriginal, trite", s: "A girl can only hear 'I love you' so many times before it sounds hackneyed." },
-            { w: "Iconoclast", d: "One who attacks common beliefs", s: "Jane seems to be an iconoclast rather than an activist." },
-            { w: "Impetuous", d: "Rash; hastily done", s: "Hilda’s hasty slaying of the king was an impetuous action." },
-            { w: "Incessant", d: "Unending", s: "The incessant rain kept us indoors for two days." }
+            { w: "Replete", d: "full, abundant", s: "The unedited version was replete with naughty words." },
+            { w: "Repose", d: "to rest, lie down", s: "The cat, after eating an entire can of tuna fish, reposed in the sun and took a long nap." },
+            { w: "Reprehensible", d: "deserving rebuke", s: "Jean’s cruel and reprehensible attempt to dump her boyfriend on his birthday led to tears and recriminations." },
+            { w: "Reprieve", d: "a temporary delay of punishment", s: "Because the governor woke up in a particularly good mood, he granted hundreds of reprieves to prisoners." },
+            { w: "Reproach", d: "to scold, disapprove", s: "Brian reproached the customer for failing to rewind the video he had rented." },
+            { w: "Reprobate", d: "evil, unprincipled", s: "The reprobate criminal sat sneering in the cell." },
+            { w: "Reprove", d: "to scold, rebuke", s: "Lara reproved her son for sticking each and every one of his fingers into the strawberry pie." },
+            { w: "Repudiate", d: "to reject, refuse to accept", s: "Kwame made a strong case for an extension of his curfew, but his mother repudiated it with a few biting words." },
+            { w: "Repulse", d: "to disgust", s: "Antisocial Annie tried to repulse people by neglecting to brush her teeth." },
+            { w: "Reputable", d: "of good reputation", s: "After the most reputable critic in the industry gave the novel a glowing review, sales took off." },
+            { w: "Requisition", d: "a demand for goods, usually made by an authority", s: "During the war, the government made a requisition of supplies." },
+            { w: "Rescind", d: "to take back, repeal", s: "The company rescinded its offer of employment after discovering that Jane’s resume was full of lies." },
+            { w: "Reservoir", d: "reserves, large supply", s: "Igor the Indomitable had quite a reservoir of strengh and could lift ten tons." },
+            { w: "Resilient", d: "able to recover from misfortune; able to withstand adversity", s: "The resilient ballplayer quickly recovered from his wrist injury." },
+            { w: "Resolute", d: "firm, determined", s: "With a resolute glint in her eye, Catherine announced that she was set on going to college." },
+            { w: "Resolve", d: "to find a solution", s: "Sarah and Emma resolved their differences and shook hands." },
+            { w: "Respite", d: "a break, rest", s: "Justin left the pub to gain a brief respite from the smoke and noise." },
+            { w: "Resplendent", d: "shiny, glowing", s: "The partygoers were resplendent in diamonds and fancy dress." },
+            { w: "Restitution", d: "restoration to the rightful owner", s: "Many people feel that descendants of slaves should receive restitution for the sufferings of their ancestors." },
+            { w: "Restive", d: "resistant, stubborn, impatient", s: "The restive audience pelted the band with mud and yelled nasty comments." },
+            { w: "Retract", d: "withdraw", s: "As the media worked itself into a frenzy, the publicist hurriedly retracted his client’s sexist statement." },
+            { w: "Revel", d: "to enjoy intensely", s: "Theodore reveled in his new status as Big Man on Campus." },
+            { w: "Revere", d: "to esteem, show deference, venerate", s: "The doctor saved countless lives with his combination of expertise and kindness and became universally revered." },
+            { w: "Revoke", d: "to take back", s: "After missing the curfew set by the court for eight nights in a row, Marcel’s freedom of movement was revoked." },
+            { w: "Rhapsodize", d: "to engage in excessive enthusiasm", s: "The critic rhapsodized about the movie, calling it an instant classic." },
+            { w: "Ribald", d: "coarsely, crudely humorous", s: "While some giggled at the ribald joke involving a parson’s daughter, most sighed and rolled their eyes." },
+            { w: "Rife", d: "abundant", s: "Surprisingly, the famous novelist’s writing was rife with spelling errors." },
+            { w: "Ruminate", d: "to contemplate, reflect", s: "Terry liked to ruminate while sitting on the banks of the river, staring pensively into the water." },
+            { w: "Ruse", d: "a trick", s: "Oliver concocted an elaborate ruse for sneaking out of the house to meet his girlfriend." },
+            { w: "Saccharine", d: "sickeningly sweet", s: "Tom’s saccharine manner, although intended to make him popular, actually repelled his classmates." },
+            { w: "Sacrosanct", d: "holy, something that should not be criticized", s: "In the United States, the Constitution is often thought of as a sacrosanct document." },
+            { w: "Sagacity", d: "shrewdness, soundness of perspective", s: "With remarkable sagacity, the wise old man predicted and thwarted his children’s plan to ship him off to a nursing home." },
+            { w: "Salient", d: "significant, conspicuous", s: "One of the salient differences between Alison and Nancy is that Alison is a foot taller." },
+            { w: "Salutation", d: "a greeting", s: "Andrew regularly began letters with the bizarre salutation “Ahoy ahoy.”" },
+            { w: "Salve", d: "a soothing balm", s: "After Tony applied a salve to his brilliant red sunburn, he soon felt a little better." },
+            { w: "Sanctimonious", d: "giving a hypocritical appearance of piety", s: "The sanctimonious Bertrand delivered stern lectures on the Ten Commandments." },
+            { w: "Sanguine", d: "optimistic, cheery", s: "Polly reacted to any bad news with a sanguine smile." },
+            { w: "Satiate", d: "to satisfy excessively", s: "Satiated after eating far too much turkey and stuffing, Liza lay on the couch." },
+            { w: "Scathing", d: "sharp, critical, hurtful", s: "Two hours after breaking up with Russell, Suzanne thought of the perfect scathing retort." },
+            { w: "Scintillating", d: "sparkling", s: "The ice skater’s scintillating rhinestone costume nearly blinded the judges." },
+            { w: "Scrupulous", d: "painstaking, careful", s: "With scrupulous care, Sam cut a snowflake out of white paper." },
+            { w: "Scurrilous", d: "vulgar, coarse", s: "When Bruno heard the scurrilous accusation being made about him, he could not believe it." },
+            { w: "Sedentary", d: "sitting, settled", s: "The sedentary cat did little but loll in the sun." },
+            { w: "Semaphore", d: "a visual signal", s: "Anne and Diana communicated with a semaphore involving candles and window shades." },
+            { w: "Seminal", d: "original, important, creating a field", s: "Stephen Greenblatt’s essays on Shakespeare proved to be seminal." },
+            { w: "Sensual", d: "involving sensory gratification, usually related to sex", s: "With a coy smile, the guest on the blind-date show announced that he considered himself a very sensual person." },
+            { w: "Sensuous", d: "involving sensory gratification", s: "Paul found drinking Coke, with all the bubbles, a very sensuous experience." },
+            { w: "Serendipity", d: "luck, finding good things without looking for them", s: "In an amazing bit of serendipity, penniless Paula found a $20 bill in the subway station." },
+            { w: "Serene", d: "calm, untroubled", s: "Louise stood in front of the Mona Lisa, puzzling over the famous woman’s serene smile." },
+            { w: "Servile", d: "subservient", s: "The servile porter crept around the hotel lobby, bowing and quaking before the guests." },
+            { w: "Sinuous", d: "lithe, serpentine", s: "With the sinuous movements of her arms, the dancer mimicked the motion of a snake." }
         ];
 
         // --- STATE MANAGEMENT ---
         let appState = {
             user: "",
-            words: [], // { id, word, def, sentence, correctCount, consecutive, isDeleted }
-            currentQuestion: null, // { wordObj, distractors, maskedSentence }
+            words: [], 
+            currentQuestion: null, 
             isWaitingForNext: false
         };
 
@@ -393,7 +407,6 @@
             gainNode.connect(audioCtx.destination);
             
             if (type === 'correct') {
-                // High ding
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(500, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
@@ -402,7 +415,6 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.5);
             } else if (type === 'wrong') {
-                // Low buzz
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(150, audioCtx.currentTime);
                 osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
@@ -411,7 +423,6 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.4);
             } else if (type === 'finish') {
-                 // Victory Arpeggio
                 const now = audioCtx.currentTime;
                 [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
                     const o = audioCtx.createOscillator();
@@ -430,7 +441,6 @@
 
         // --- INITIALIZATION ---
         function init() {
-            // Initialize word list with stats
             appState.words = rawData.map((item, index) => ({
                 id: index,
                 word: item.w,
@@ -441,15 +451,12 @@
                 isDeleted: false
             }));
 
-            // DOM Elements
             const startBtn = document.getElementById('start-btn');
             const nextBtn = document.getElementById('next-btn');
-            const usernameInput = document.getElementById('username-input');
 
             startBtn.addEventListener('click', startGame);
             nextBtn.addEventListener('click', nextQuestion);
 
-            // Keydown listener for Enter
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     if (appState.isWaitingForNext) {
@@ -474,7 +481,6 @@
 
         // --- GAME LOGIC ---
         function generateQuestion() {
-            // Filter available words (not deleted)
             const availablePool = appState.words.filter(w => !w.isDeleted);
 
             if (availablePool.length === 0) {
@@ -482,25 +488,23 @@
                 return;
             }
 
-            // Pick a random word
-            // Improved selection: Prioritize words seen less often or maintained words to verify
+            // Weighted random selection: Give slightly higher chance to "maintained" words to clear them out, or new words
             const targetWord = availablePool[Math.floor(Math.random() * availablePool.length)];
 
-            // Create Masked Sentence
-            // Regex to find the word, case insensitive, and masking it
-            const regex = new RegExp(targetWord.word.substring(0, 4), 'i'); // Match first 4 chars to handle tenses loosely
+            // Create Masked Sentence (looks for first 4 letters to handle tenses)
+            const regex = new RegExp(targetWord.word.substring(0, 4), 'i'); 
             const maskedSentence = targetWord.sentence.replace(regex, "_______");
 
             // Pick 3 distractors
             const distractors = [];
             while (distractors.length < 3) {
                 const r = rawData[Math.floor(Math.random() * rawData.length)];
+                // Ensure distractor is not the target and not already in distractors
                 if (r.w !== targetWord.word && !distractors.includes(r.w)) {
                     distractors.push(r.w);
                 }
             }
 
-            // Shuffle options
             const options = [...distractors, targetWord.word].sort(() => Math.random() - 0.5);
 
             appState.currentQuestion = {
@@ -515,7 +519,6 @@
         function renderQuestion() {
             appState.isWaitingForNext = false;
 
-            // Reset UI
             document.getElementById('footer').classList.remove('show', 'correct', 'wrong');
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
@@ -523,8 +526,9 @@
             // Status Indicator
             const w = appState.currentQuestion.wordObj;
             const statusEl = document.getElementById('word-status');
+            
             if (w.correctCount >= 3) {
-                statusEl.innerHTML = "🔥 MASTERED (Next correct removes it)";
+                statusEl.innerHTML = "🔥 MASTERED (Next correct clears it)";
                 statusEl.style.color = "orange";
             } else if (w.consecutive >= 2) {
                 statusEl.innerHTML = "✨ MAINTAINED";
@@ -546,17 +550,15 @@
                 optionsContainer.appendChild(btn);
             });
 
-            // Update Progress Bar
             updateProgressBar();
         }
 
         function handleAnswer(btnElement, selectedOption) {
-            if (appState.isWaitingForNext) return; // Prevent multiple clicks
+            if (appState.isWaitingForNext) return;
 
             const correctWord = appState.currentQuestion.wordObj.word;
             const isCorrect = selectedOption === correctWord;
             
-            // UI Update
             const allBtns = document.querySelectorAll('.options-grid .btn');
             allBtns.forEach(b => {
                 b.disabled = true;
@@ -564,10 +566,8 @@
                 else if (b === btnElement && !isCorrect) b.classList.add('wrong');
             });
 
-            // Logic Update
             updateWordStats(isCorrect);
 
-            // Feedback Footer
             const footer = document.getElementById('footer');
             const title = document.getElementById('feedback-title');
             const text = document.getElementById('feedback-definition');
@@ -596,12 +596,12 @@
                 word.consecutive++;
                 word.correctCount++;
                 
-                // Rule 3: 4th time right -> Delete
+                // Rule: 4th time right -> Delete (Clear)
                 if (word.correctCount >= 4) {
                     word.isDeleted = true;
                 }
             } else {
-                // Rule 4: Wrong -> Reset consecutive, but not total count
+                // Rule: Wrong -> Consecutive resets, but don't delete progress completely
                 word.consecutive = 0;
             }
         }
@@ -612,7 +612,6 @@
         }
 
         function updateProgressBar() {
-            // Calculate progress based on deleted words
             const total = appState.words.length;
             const deleted = appState.words.filter(w => w.isDeleted).length;
             const percentage = (deleted / total) * 100;
